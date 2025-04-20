@@ -1,0 +1,133 @@
+.form-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form {
+    width: 98%;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.input-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.input-item {
+    flex: 1;
+}
+
+.input-item select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #444;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+    height: 100px;
+}
+
+/* Группа кнопок "Редактировать" и "Закрыть" */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    margin-top: 20px;
+}
+
+/* Общие стили для кнопок */
+button.submit-btn {
+    width: 150px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Кнопка "Закрыть" */
+#close-request {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#close-request:hover {
+    background-color: #45a049;
+}
+
+/* Кнопка "Редактировать" */
+#edit-request {
+    background-color: red;
+    color: white;
+}
+
+#edit-request:hover {
+    background-color: darkred;
+}
+
+/* Кнопка "Сохранить" (режим редактирования) */
+#edit-request.save-mode {
+    background-color: #ff8c00;
+    color: white;
+}
+
+#edit-request.save-mode:hover {
+    background-color: #e07b00;
+}
+
+/* Кнопка "Восстановить" */
+#reopen-request {
+    background-color: red;
+    color: white;
+    display: block;
+    margin: 20px auto; /* Центрирование кнопки */
+    width: 150px;
+}
+
+#reopen-request:hover {
+    background-color: darkred;
+}
+
+/* Кнопка "Закрыть" */
+
+#open-request {
+    background-color: #4CAF50;
+    color: white;
+    display: block;
+    margin: 20px auto; /* Центрирование кнопки */
+    width: 150px;
+}
+
+#open-request:hover {
+    background-color: #45a049;
+}
+

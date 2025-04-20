@@ -1,0 +1,48 @@
+/* Ширина столбцов */
+th, td{
+    text-align: center;
+}
+th.request, td.request {
+    width: 10px;  /* Запрос 10px */
+}
+
+th.date, td.date {
+    width: 100px;  /* Дата 50px */
+}
+
+th.time, td.time {
+    width: 50px;  /* Дата 50px */
+}
+
+th.priority, td.priority {
+    width: 20px;  /* Приоритет 50px */
+}
+
+th.from, td.from {
+    width: 50px;  /* От 50px */
+}
+
+th.status, td.status {
+    width: 50px;  /* Статус 50px */
+}
+
+th.edit, td.edit {
+    width: 50px;  /* Статус 50px */
+}
+
+
+.edit-btn {
+    display: flex;
+    justify-content: center;  /* Центрируем кнопку по горизонтали */
+    align-items: center;      /* Центрируем кнопку по вертикали */
+    margin: 0 auto;           /* Для того, чтобы элемент стал блочным и по центру */
+    border: none;             /* Убираем стандартные границы */
+    background: transparent;  /* Убираем фон */
+    cursor: pointer;         /* Устанавливаем указатель на кнопке */
+}
+
+/* Если нужно, можно добавить стили для изображения */
+.edit-btn img {
+    width: 20px;
+    height: 20px;
+}

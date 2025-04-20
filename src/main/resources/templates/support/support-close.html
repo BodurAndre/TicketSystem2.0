@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/css/support/support.css"/>
+    <link rel="stylesheet" href="/css/loading.css"/>
+    <link rel="stylesheet" href="/css/support/support-table.css"/>
+</head>
+<body class="loading">
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+    <div class="main-content">
+        <header>
+            <a href="/" id="logo">Ticket</a>
+            <div id="user-info">
+                <span>Добро пожаловать&nbsp</span>
+                <span>|</span>
+                <a href="/support/account/myAccount" class="orange-link processor-menu user-menu">Мои настройки</a>
+                <span class="processor-menu user-menu">|</span>
+                <a href="/logout" class="orange-link">Выйти</a>
+            </div>
+        </header>
+        <div class="body">
+            <nav>
+                <div id="logout-form">
+                    <input type="text" name="title">
+                    <input class="btn-logout" type="submit" value="Поиск">
+                </div>
+                <a href="/" class="orange-link admin-menu">Главная страница</a>
+                <a href="/create" class="orange-link processor-menu">Создать задачу</a>
+                <a href="/support/close" class="orange-link active">Закрытые запросы</a>
+                <a href="/support/AllAccount" class="orange-link user-menu processor-menu">Пользователи</a>
+                <a href="/admin/account/MyAccount" class="orange-link">Мой аккаунт</a>
+            </nav>
+            <table>
+                <thead>
+                <tr>
+                    <th class="request">ID</th>
+                    <th class="date">Дата</th>
+                    <th class="time">Время</th>
+                    <th class="tema">Тема</th>
+                    <th class="priority">Приоритет</th>
+                    <th class="from">От</th>
+                    <th class="status">Статус</th>
+                    <th class="edit">Действие</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/support/support.js"></script>
+<script src="/js/support/getRequestClose.js"></script>
+</html>

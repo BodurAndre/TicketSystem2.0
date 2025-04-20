@@ -1,0 +1,161 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+a#logo {
+    font-size: 1.5em;
+    color: #ff8c00;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+a#logo:hover {
+    color: #fff;
+}
+
+#user-info {
+    text-align: right;
+    display: flex;
+    align-items: center;
+}
+
+#user-info a {
+    color: #ff8c00;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+#user-info a:hover {
+    color: #fff;
+}
+
+#logout-form {
+    margin: 0;
+}
+
+nav {
+    background-color: #fff;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav form {
+    display: flex;
+    align-items: center;
+}
+
+nav input[type="text"] {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+nav input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+nav input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+nav a {
+    color: #333;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #ff8c00;
+}
+
+table {
+    width: 100%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #555;
+    color: #fff;
+}
+
+.body {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.support {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+b {
+    color: #007bff;
+}
+
+.btn-logout {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0 10px;
+}
+
+.btn-logout:hover {
+    background-color: #0056b3;
+}
+
+td[colspan="5"] {
+    word-break: break-all;
+}
+
+.active {
+    color: #ff8c00;
+}

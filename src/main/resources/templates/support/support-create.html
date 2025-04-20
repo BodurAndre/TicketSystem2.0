@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/css/support/support.css" />
+    <link rel="stylesheet" href="/css/loading.css"/>
+    <link rel="stylesheet" href="/css/support/support-create.css" />
+</head>
+<body class="loading">
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+    <div class="main-content">
+        <header>
+            <a href="/" id="logo">Ticket</a>
+            <div id="user-info">
+                <span>Добро пожаловать&nbsp</span>
+                <span>|</span>
+                <a href="/support/account/myAccount" class="orange-link user-menu">Мои настройки</a>
+                <span class="user-menu">|</span>
+                <a href="/logout" class="orange-link">Выйти</a>
+            </div>
+        </header>
+        <div class="body">
+            <nav>
+                <a href="/" class="orange-link">Главная</a>
+                <a href="/create" class="orange-link active">Создать задачу</a>
+                <a href="/support/close" class="orange-link">Закрытые запросы</a>
+                <a href="/support/AllAccount" class="orange-link user-menu">Пользователи</a>
+                <a href="/admin/account/MyAccount" class="orange-link">Мой аккаунт</a>
+            </nav>
+
+            <div class="form-container">
+                <div class="form">
+                    <h2>Create Request</h2>
+                    <form id="create-request-form" action="#" method="POST">
+                        <div class="input-group">
+                            <div class="input-item">
+                                <label for="tema">Заголовок:</label>
+                                <input type="text" id="tema" name="tema" placeholder="Enter the subject" required>
+                            </div>
+                            <div class="input-item">
+                                <label for="priority">Приоритет:</label>
+                                <select id="priority" name="priority" required>
+                                    <option value="" disabled selected>Select priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group user-menu">
+                            <div class="input-item">
+                                <label for="select-user">Пользователь:</label>
+                                <select id="select-user" name="userId" required>
+                                    <option value="" disabled selected>Выберите пользователя</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label for="description">Описание:</label>
+                        <textarea id="description" name="description" placeholder="Enter the description" required></textarea>
+                        <button id="open-request" type="submit" class="submit-btn">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/support/support.js"></script>
+<script src="/js/support/setRequest.js"></script>
+<script src="/js/support/getNameUser.js"></script>
+<script src="/js/support/notification.js"></script>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/css/support/support.css" />
+    <link rel="stylesheet" href="/css/loading.css"/>
+    <link rel="stylesheet" href="/css/support/support-create.css" />
+</head>
+<body class="loading">
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <a href="/" id="logo">Ticket</a>
+            <div id="user-info">
+                <span>Добро пожаловать&nbsp</span>
+                <span>|</span>
+                <a href="/support/account/myAccount" class="orange-link processor-menu user-menu">Мои настройки</a>
+                <span class="processor-menu user-menu">|</span>
+                <a href="/logout" class="orange-link">Выйти</a>
+            </div>
+        </header>
+        <div class="body">
+            <nav>
+                <a href="/" class="orange-link">Главная</a>
+                <a href="/create" class="orange-link processor-menu">Создать задачу</a>
+                <a href="/support/close" class="orange-link">Закрытые запросы</a>
+                <a href="/support/AllAccount" class="orange-link processor-menu user-menu">Пользователи</a>
+                <a href="/admin/account/MyAccount" class="orange-link">Мой аккаунт</a>
+            </nav>
+
+            <div class="form-container">
+                <div class="form">
+                    <h2>Request Details</h2>
+                    <div class="input-group">
+                        <div class="input-item">
+                            <label for="data">Дата:</label>
+                            <input type="text" id="data" readonly>
+                        </div>
+                        <div class="input-item">
+                            <label for="time">Время:</label>
+                            <input type="text" id="time" readonly>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-item">
+                            <label for="tema">Заголовок:</label>
+                            <input type="text" id="tema" readonly>
+                        </div>
+                        <div class="input-item">
+                            <label for="priority">Приоритет:</label>
+                            <select id="priority" name="priority" disabled>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-item">
+                            <label for="select-user">Пользователь:</label>
+                            <select id="select-user" name="select-user" disabled>
+                            </select>
+                        </div>
+                        <div class="input-item">
+                            <label for="status">Статус:</label>
+                            <input type="text" id="status" readonly>
+                        </div>
+                    </div>
+
+                    <label for="description">Описание:</label>
+                    <textarea id="description" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/support/support.js"></script>
+<script src="/js/support/getRequest.js"></script>
+<script src="/js/support/editRequest.js"></script>
+<script src="/js/support/notification.js"></script>
+<script src="/js/support/getNameUser.js"></script>
+</html>

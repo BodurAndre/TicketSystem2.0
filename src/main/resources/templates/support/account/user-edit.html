@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/css/support/support.css" />
+    <link rel="stylesheet" href="/css/support/support-create.css" />
+</head>
+<body>
+<header>
+    <a href="/" id="logo">Ticket</a>
+    <div id="user-info">
+        <span>Добро пожаловать&nbsp</span>
+        <span>|</span>
+        <a href="/support/account/myAccount" class="orange-link">Мои настройки</a>
+        <span>|</span>
+        <a href="/logout" class="orange-link">Выйти</a>
+    </div>
+</header>
+<div class="body">
+    <nav>
+        <a href="/" class="orange-link">Главная</a>
+        <a href="/create" class="orange-link">Создать задачу</a>
+        <a href="/support/close" class="orange-link">Закрытые запросы</a>
+        <a href="/support/AllAccount" class="orange-link active">Пользователи</a>
+        <a href="/admin/account/MyAccount" class="orange-link">Мой аккаунт</a>
+    </nav>
+
+    <div class="form-container">
+        <div class="form">
+            <h2>Информация о пользователе</h2>
+
+            <div class="input-group">
+                <div class="input-item">
+                    <label for="firstName">Имя:</label>
+                    <input type="text" id="firstName" readonly>
+                </div>
+                <div class="input-item">
+                    <label for="lastName">Фамилия:</label>
+                    <input type="text" id="lastName" readonly>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-item">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" readonly>
+                </div>
+                <div class="input-item">
+                    <label for="role">Роль:</label>
+                    <input type="text" id="role" readonly>
+                </div>
+            </div>
+
+
+
+            <div class="input-group">
+                <div class="input-item">
+                    <label for="country">Страна:</label>
+                    <input type="text" id="country" readonly>
+                </div>
+                <div class="input-item">
+                    <label for="dateOfBirth">День рождения:</label>
+                    <input type="text" id="dateOfBirth" readonly>
+                </div>
+                <div class="input-item">
+                    <label for="gender">Пол:</label>
+                    <input type="text" id="gender" readonly>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="edit-request" type="button" class="submit-btn">Редактировать</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/support/getUser.js"></script>
+<script src="/js/support/notification.js"></script>
+</html>

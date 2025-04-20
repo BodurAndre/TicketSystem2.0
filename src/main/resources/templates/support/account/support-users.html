@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/css/support/support.css"/>
+    <link rel="stylesheet" href="/css/support/support-table.css"/>
+</head>
+<body>
+<header>
+    <a href="/" id="logo">Ticket</a>
+    <div id="user-info">
+        <span>Добро пожаловать&nbsp</span>
+        <span>|</span>
+        <a href="/support/account/myAccount" class="orange-link">Мои настройки</a>
+        <span>|</span>
+        <a href="/logout" class="orange-link">Выйти</a>
+    </div>
+</header>
+<div class="body">
+    <nav>
+        <div id="logout-form">
+            <input type="text" name="title">
+            <input class="btn-logout" type="submit" value="Поиск">
+        </div>
+        <a href="/create" class="orange-link">Создать задачу</a>
+        <a href="/support/close" class="orange-link">Закрытые запросы</a>
+        <a href="/support/AllAccount" class="orange-link active">Пользователи</a>
+        <a href="/admin/account/MyAccount" class="orange-link">Мой аккаунт</a>
+    </nav>
+    <table id="usersTable">
+        <thead>
+        <tr>
+            <th class="request">ID</th>
+            <th class="email">Email</th>
+            <th class="firstName">Имя</th>
+            <th class="lastName">Фамилия</th>
+            <th class="gender">Пол</th>
+            <th class="role">Роль</th>
+            <th class="edit">Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/support/support.js"></script>
+<script src="/js/support/getUsers.js"></script>
+</html>

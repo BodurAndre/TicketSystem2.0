@@ -177,7 +177,7 @@ public class SupportController {
 
 
     @PostMapping("/RequestCreate")
-    public ResponseEntity<String> createRequest(@RequestBody RequestDTO requestDTO) {
+    public ResponseEntity<?> createRequest(@RequestBody RequestDTO requestDTO) {
         try {
             // Получение текущего авторизованного пользователя
 

@@ -1,7 +1,10 @@
 package org.example.server.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.server.DTO.RequestUpdateDTO;
 import org.example.server.DTO.UserDTO;
+import org.example.server.DTO.UserUpdateDTO;
+import org.example.server.models.Request;
 import org.example.server.models.User;
 import org.example.server.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -10,9 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -90,6 +91,19 @@ public class UserController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(userDTO);
+    }
+
+    @PostMapping("/updateUser")
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+        try {
+            log.warn("userUpdateDTO - " + userUpdateDTO);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("{\"message\": \"Заявка обновлена\"}");
+        } catch (Exception e) {
+            log.error("Internal server error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при обновлении заявки\"}");
+        }
     }
 
 }

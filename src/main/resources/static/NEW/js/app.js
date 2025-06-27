@@ -2,25 +2,34 @@ window.addEventListener('DOMContentLoaded', route);
 window.addEventListener('hashchange', route);
 
 function route() {
-    const page = window.location.hash.slice(1) || 'loadAllTickets';
-    console.log(page);
-    if(page === 'users') loadPageUsers();
-    else loadPage(page);
+    const hash = window.location.hash.slice(1) || 'loadAllTickets';
+    if (hash === 'users') {
+        loadPageUsers();
+    } else if (hash.startsWith('request-id')) {
+        const id = hash.replace('request-id', '');
+        loadPage('editRequest', id);
+    } else {
+        loadPage(hash);
+    }
 }
 
-async function loadPage(pageName) {
+
+async function loadPage(pageName, id = null) {
     const container = document.getElementById('app');
     try {
         const html = await fetch(`/NEW/html/${pageName}.html`).then(r => r.text());
         container.innerHTML = html;
 
-        const scriptModule = await import(`/NEW/js/${pageName}.js`);
-        if (scriptModule.init) scriptModule.init(); // вызываем init() если есть
+        const scriptModule = await import(`/NEW/js/${pageName}.js?${Date.now()}`);
+        if (scriptModule.init) {
+            scriptModule.init(id); // передаем id если есть
+        }
     } catch (err) {
         container.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
         console.error(err);
     }
 }
+
 
 async function loadPageUsers() {
     const container = document.getElementById('app');

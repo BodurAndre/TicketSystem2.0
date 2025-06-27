@@ -1,0 +1,41 @@
+<div class="form-container">
+    <div class="form">
+        <h2><i class="fas fa-edit"></i> Детали тикета</h2>
+        <div class="input-group">
+            <div class="input-item">
+                <label for="data">Дата:</label>
+                <input type="text" id="data" readonly>
+            </div>
+            <div class="input-item">
+                <label for="time">Время:</label>
+                <input type="text" id="time" readonly>
+            </div>
+        </div>
+        <div class="input-group">
+            <div class="input-item">
+                <label for="tema">Заголовок:</label>
+                <input type="text" id="tema" readonly>
+            </div>
+            <div class="input-item">
+                <label for="priority">Приоритет:</label>
+                <select id="priority" name="priority" disabled>
+                    <option value="low">Низкий</option>
+                    <option value="medium">Средний</option>
+                    <option value="high">Высокий</option>
+                </select>
+            </div>
+        </div>
+        <div class="input-group">
+            <div class="input-item">
+                <label for="select-user">Пользователь:</label>
+                <select id="select-user" name="select-user" disabled></select>
+            </div>
+            <div class="input-item">
+                <label for="status">Статус:</label>
+                <input type="text" id="status" readonly>
+            </div>
+        </div>
+        <label for="description">Описание:</label>
+        <textarea id="description" readonly></textarea>
+    </div>
+</div>

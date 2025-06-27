@@ -111,5 +111,3 @@ document.addEventListener("click", async function (event) {
         }
     }
 });
-
-

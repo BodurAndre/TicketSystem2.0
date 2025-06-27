@@ -1,16 +1,28 @@
-document.addEventListener("DOMContentLoaded", async function () {
-    const urlParts = window.location.pathname.split("/");
-    const id = urlParts[urlParts.length - 1];
+let requestId;
 
-    if (!isNaN(id)) {
-        await loadRequestData(id);
-    } else {
-        console.error("Некорректный ID в URL");
+async function getCsrfToken() {
+    return $.ajax({
+        url: "/csrf-token",
+        method: "GET",
+        dataType: "json",
+        xhrFields: { withCredentials: true }
+    }).then(data => ({ headerName: data.headerName, token: data.token }))
+        .catch(() => {
+            console.error("Error fetching CSRF token");
+            throw new Error("CSRF token error");
+        });
+}
+
+export function init(id) {
+    if (!id) {
+        console.error("Нет ID заявки!");
+        return;
     }
-});
+    requestId = id;
+    loadTicketData(id);
+}
 
-// Функция загрузки данных заявки
-async function loadRequestData(id) {
+async function loadTicketData(id) {
     try {
         const userRole = localStorage.getItem("role");
         const response = await fetch(`/getRequest/${id}`);
@@ -103,7 +115,6 @@ async function loadRequestData(id) {
     }
 }
 
-// Функция переключения режима редактирования
 function toggleEditMode() {
     const inputs = document.querySelectorAll("#tema, #description, #status");
     const selects = document.querySelectorAll("#priority, #select-user"); // Получаем select
@@ -145,8 +156,64 @@ function toggleEditMode() {
 window.refreshRequestData = async function () {
     const id = window.location.pathname.split("/").pop();
     if (!isNaN(id)) {
-        await loadRequestData(id);
+        await loadTicketData(id);
     }
 };
 
+// Обработчик закрытия заявки
+$(document).on('click', '#close-request', async function () {
+    try {
+        const csrf = await getCsrfToken();
+        $.ajax({
+            url: "/requestClose",
+            method: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(requestId),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function (data) {
+                console.log("Request close:", data);
+                showNotification(data.message, true);
+                window.refreshRequestData();
+                const closeButton = document.getElementById("close-request");
+                if (closeButton) closeButton.style.display = "none";
+            },
+            error: function (error) {
+                console.error("Error:", error);
+                showNotification("Code " + error.status + " : " + error.responseJSON?.error, false);
+            }
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        showNotification("Ошибка", false);
+    }
+});
 
+// Обработчик восстановления заявки
+$(document).on('click', '#reopen-request', async function () {
+    try {
+        const csrf = await getCsrfToken();
+        $.ajax({
+            url: "/reopenRequest",
+            method: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(requestId),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function (data) {
+                console.log("Request reopen:", data);
+                showNotification(data.message, true);
+                window.refreshRequestData();
+            },
+            error: function (error) {
+                console.error("Error:", error);
+                showNotification("Code " + error.status + " : " + error.responseJSON?.error, false);
+            }
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        showNotification("Ошибка", false);
+    }
+});

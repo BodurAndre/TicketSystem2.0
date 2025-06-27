@@ -36,6 +36,53 @@ public class SupportController {
         this.userService = userService;
     }
 
+    /*NEW Version*/
+
+    @GetMapping(value = "/requests", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> requests() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Пользователь не аутентифицирован");
+        }
+
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+        boolean isAdmin = authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        boolean isProcessor = authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_PROCESSOR"));
+
+        List<Request> requestList;
+
+        if (isAdmin) {
+            requestList = requestService.getAllRequests();
+        } else {
+            String email;
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof UserDetails) {
+                email = ((UserDetails) principal).getUsername();
+            } else {
+                email = principal.toString();
+            }
+
+            if (isProcessor) {
+                requestList = requestService.getRequestsByCreatorEmail(email);
+            } else {
+                requestList = requestService.getRequestsByAssigneeEmail(email);
+            }
+        }
+
+        List<RequestListDTO> dtoList = requestList.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+
+        log.warn("RequestListOpen" + dtoList);
+        return ResponseEntity.ok(dtoList);
+    }
+
+    /*NEW Version*/
+
     @GetMapping(value = "/getRequestsOpen", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> getRequestsOpen() {

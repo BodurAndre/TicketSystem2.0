@@ -22,7 +22,7 @@ public class HomeController {
 
     @GetMapping(value = "/")
     public String home(){
-        return "support/support";
+        return "NEW_HTML/index";
     }
 
     @GetMapping(value = "/create")

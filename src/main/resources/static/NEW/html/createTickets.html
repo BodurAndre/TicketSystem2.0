@@ -1,0 +1,35 @@
+<div class="form-container">
+    <div class="form">
+        <h2><i class="fas fa-plus-circle"></i> Создать тикет</h2>
+        <form id="create-request-form" action="#" method="POST">
+            <div class="input-group">
+                <div class="input-item">
+                    <label for="tema">Заголовок:</label>
+                    <input type="text" id="tema" name="tema" placeholder="Введите тему" required>
+                </div>
+                <div class="input-item">
+                    <label for="priority">Приоритет:</label>
+                    <select id="priority" name="priority" required>
+                        <option value="" disabled selected>Выберите приоритет</option>
+                        <option value="low">Низкий</option>
+                        <option value="medium">Средний</option>
+                        <option value="high">Высокий</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group user-menu">
+                <div class="input-item">
+                    <label for="select-user">Пользователь:</label>
+                    <select id="select-user" name="userId" required>
+                        <option value="" disabled selected>Выберите пользователя</option>
+                    </select>
+                </div>
+            </div>
+            <label for="description">Описание:</label>
+            <textarea id="description" name="description" placeholder="Введите описание" required></textarea>
+            <button id="open-request" type="submit" class="submit-btn">
+                <i class="fas fa-paper-plane"></i> Создать
+            </button>
+        </form>
+    </div>
+</div>

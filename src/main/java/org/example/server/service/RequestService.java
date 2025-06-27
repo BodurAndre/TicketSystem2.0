@@ -23,6 +23,24 @@ public class RequestService {
         this.requestRepository = requestRepository;
     }
 
+    /*NEW VERSION*/
+
+    public List<Request> getAllRequests() {
+        List<Request> requests = requestRepository.findAll();
+        return requests.isEmpty() ? new ArrayList<>() : requests;
+    }
+
+    public List<Request> getRequestsByCreatorEmail(String email) {
+        List<Request> requests = requestRepository.findByCreateUser_Email(email);
+        return requests.isEmpty() ? new ArrayList<>() : requests;
+    }
+    public List<Request> getRequestsByAssigneeEmail(String email) {
+        List<Request> requests = requestRepository.findByAssigneeUser_Email(email);
+        return requests.isEmpty() ? new ArrayList<>() : requests;
+    }
+
+    /*NEW VERSION*/
+
     public List<Request> getAllRequestsWithStatusOpen() {
         List<Request> requests = requestRepository.findByStatus("OPEN");
         return requests.isEmpty() ? new ArrayList<>() : requests;

@@ -47,6 +47,9 @@ public class User {
     @Column(name = "ROLE")
     private String role;
 
+    @Column(name = "FIRSTLOGIN")
+    private Boolean firstLogin;
+
     public User(String email, String password, String firstName, String lastName, String dateOfBirth, String country, String gender) {
         this.email = email;
         this.password = password;

@@ -46,6 +46,11 @@ public class HomeController {
         return "support/support-edit"; // Возвращаем имя шаблона для редактирования
     }
 
+    @GetMapping(value = "/account/CreateUser")
+    public String createUser() {
+        return "support/account/create-user";
+    }
+
     @GetMapping(value = "/support/close")
     public String close(){
         return "support/support-close";

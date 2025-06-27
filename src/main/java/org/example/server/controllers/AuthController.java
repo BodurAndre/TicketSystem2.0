@@ -40,7 +40,7 @@ public class AuthController {
             String rawPassword = user.getPassword();
             user.setRole("USER");
 
-            User newUser = userService.createUser(user);
+            User newUser = userService.registerNewUser(user);
             if (newUser == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Ошибка: Не удалось создать пользователя.");
                 return "redirect:/register";

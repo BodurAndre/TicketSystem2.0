@@ -1,5 +1,7 @@
 package org.example.server.service;
 
+import org.example.server.DTO.UserCreateDTO;
+import org.example.server.DTO.UserUpdateDTO;
 import org.example.server.models.Request;
 import org.example.server.models.User;
 import org.example.server.repositories.UserRepository;
@@ -23,7 +25,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User createUser(User user){
+    public User registerNewUser(User user){
         if (userRepository.findUserByEmail(user.getEmail()) != null) {
             throw new IllegalArgumentException("Пользователь с таким именем уже существует.");
         }
@@ -31,6 +33,24 @@ public class UserService {
         User newUser = userRepository.save(user);
         userRepository.flush();
         return newUser;
+    }
+
+    public void createUser(UserCreateDTO userCreateDTO, String password){
+        if (userRepository.findUserByEmail(userCreateDTO.getEmail()) != null) {
+            throw new IllegalArgumentException("Пользователь с таким Email уже существует.");
+        }
+        User user = new User();
+        user.setEmail(userCreateDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFirstName(userCreateDTO.getFirstName());
+        user.setLastName(userCreateDTO.getLastName());
+        user.setGender(userCreateDTO.getGender());
+        user.setDateOfBirth(userCreateDTO.getDateOfBirth());
+        user.setRole(userCreateDTO.getRole());
+        user.setCountry(userCreateDTO.getCountry());
+        user.setFirstLogin(true);
+        userRepository.save(user);
+        userRepository.flush();
     }
 
     public List<User> getAllUsersWithoutCurrentUser(String username) {
@@ -45,5 +65,17 @@ public class UserService {
 
     public User getUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
+    }
+
+    public void updateUser(UserUpdateDTO userUpdateDTO) {
+        User user = getUser(userUpdateDTO.getUserId());
+        user.setEmail(userUpdateDTO.getEmail());
+        user.setFirstName(userUpdateDTO.getFirstName());
+        user.setLastName(userUpdateDTO.getLastName());
+        user.setRole(userUpdateDTO.getRole());
+        user.setCountry(userUpdateDTO.getCountry());
+        user.setDateOfBirth(userUpdateDTO.getDateOfBirth());
+        user.setGender(userUpdateDTO.getGender());
+        userRepository.save(user);
     }
 }

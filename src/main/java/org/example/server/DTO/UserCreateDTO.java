@@ -3,7 +3,7 @@ package org.example.server.DTO;
 import lombok.Data;
 
 @Data
-public class UserUpdateDTO {
+public class UserCreateDTO {
     private String firstName;
     private String lastName;
     private String email;
@@ -11,5 +11,4 @@ public class UserUpdateDTO {
     private String country;
     private String dateOfBirth;
     private String gender;
-    private Long userId;
 }

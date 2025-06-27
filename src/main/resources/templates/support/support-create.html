@@ -1,53 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход</title>
+    <title>Создать тикет</title>
     <link rel="stylesheet" href="/css/support/support.css" />
     <link rel="stylesheet" href="/css/loading.css"/>
     <link rel="stylesheet" href="/css/support/support-create.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="loading">
     <div id="preloader">
         <div class="spinner"></div>
     </div>
     <div class="main-content">
-        <header>
-            <a href="/" id="logo">Ticket</a>
-            <div id="user-info">
-                <span>Добро пожаловать&nbsp</span>
-                <span>|</span>
-                <a href="/support/account/myAccount" class="orange-link user-menu">Мои настройки</a>
-                <span class="user-menu">|</span>
-                <a href="/logout" class="orange-link">Выйти</a>
+        <header class="modern-header">
+            <div class="header-container">
+                <div class="logo-section">
+                    <a href="/" id="logo">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>TicketSystem</span>
+                    </a>
+                </div>
+                <div id="user-info">
+                    <div class="user-welcome">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Добро пожаловать</span>
+                    </div>
+                    <div class="user-actions">
+                        <a href="/support/account/myAccount" class="user-action-btn">
+                            <i class="fas fa-cog"></i>
+                            <span>Настройки</span>
+                        </a>
+                        <a href="/logout" class="user-action-btn logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Выйти</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </header>
         <div class="body">
-            <nav>
-                <a href="/" class="orange-link">Главная</a>
-                <a href="/create" class="orange-link active">Создать задачу</a>
-                <a href="/support/close" class="orange-link">Закрытые запросы</a>
-                <a href="/support/AllAccount" class="orange-link user-menu">Пользователи</a>
-                <a href="/admin/account/MyAccount" class="orange-link">Мой аккаунт</a>
+            <nav class="modern-nav">
+                <div class="nav-left">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="title" placeholder="Поиск по тикетам...">
+                            <button class="search-btn" type="submit">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-center">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home user-menu"></i>
+                        <span>Главная</span>
+                    </a>
+                    <a href="/create" class="nav-link user-menu active">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Создать задачу</span>
+                    </a>
+                    <a href="/support/close" class="nav-link user-menu">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Закрытые запросы</span>
+                    </a>
+                    <a href="/support/AllAccount" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Пользователи</span>
+                    </a>
+                    <a href="/MyAccount" class="nav-link user-menu">
+                        <i class="fas fa-user"></i>
+                        <span>Мой аккаунт</span>
+                    </a>
+                </div>
+                <div class="nav-right">
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span class="stat-number" id="total-tickets">0</span>
+                            <span class="stat-label">Всего тикетов</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-plus-circle"></i>
+                            <span class="stat-number" id="created-tickets">0</span>
+                            <span class="stat-label">Создано</span>
+                        </div>
+                    </div>
+                </div>
             </nav>
-
             <div class="form-container">
                 <div class="form">
-                    <h2>Create Request</h2>
+                    <h2><i class="fas fa-plus-circle"></i> Создать тикет</h2>
                     <form id="create-request-form" action="#" method="POST">
                         <div class="input-group">
                             <div class="input-item">
                                 <label for="tema">Заголовок:</label>
-                                <input type="text" id="tema" name="tema" placeholder="Enter the subject" required>
+                                <input type="text" id="tema" name="tema" placeholder="Введите тему" required>
                             </div>
                             <div class="input-item">
                                 <label for="priority">Приоритет:</label>
                                 <select id="priority" name="priority" required>
-                                    <option value="" disabled selected>Select priority</option>
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
+                                    <option value="" disabled selected>Выберите приоритет</option>
+                                    <option value="low">Низкий</option>
+                                    <option value="medium">Средний</option>
+                                    <option value="high">Высокий</option>
                                 </select>
                             </div>
                         </div>
@@ -59,10 +117,11 @@
                                 </select>
                             </div>
                         </div>
-
                         <label for="description">Описание:</label>
-                        <textarea id="description" name="description" placeholder="Enter the description" required></textarea>
-                        <button id="open-request" type="submit" class="submit-btn">Create</button>
+                        <textarea id="description" name="description" placeholder="Введите описание" required></textarea>
+                        <button id="open-request" type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Создать
+                        </button>
                     </form>
                 </div>
             </div>

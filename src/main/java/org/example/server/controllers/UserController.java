@@ -2,6 +2,7 @@ package org.example.server.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.server.DTO.RequestUpdateDTO;
+import org.example.server.DTO.UserCreateDTO;
 import org.example.server.DTO.UserDTO;
 import org.example.server.DTO.UserUpdateDTO;
 import org.example.server.models.Request;
@@ -15,6 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,13 +100,56 @@ public class UserController {
     public ResponseEntity<?> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
         try {
             log.warn("userUpdateDTO - " + userUpdateDTO);
+            userService.updateUser(userUpdateDTO);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("{\"message\": \"Заявка обновлена\"}");
+                    .body("{\"message\": \"Данные пользователя обновлены\"}");
         } catch (Exception e) {
             log.error("Internal server error: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Ошибка при обновлении заявки\"}");
+                    .body("{\"message\": \"Ошибка при обновлении данных пользователя\"}");
         }
     }
 
+    @PostMapping("/createUser")
+    public ResponseEntity<?> createUser(@RequestBody UserCreateDTO userCreateDTO) {
+        try {
+            log.warn("userCreateDTO - " + userCreateDTO);
+
+            String generatedPassword = generatePassword(8);
+            String email = userCreateDTO.getEmail();
+            userService.createUser(userCreateDTO, generatedPassword);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Пользователь успешно создан");
+            response.put("email", email);
+            response.put("password", generatedPassword);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("Ошибка при создании пользователя: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Collections.singletonMap("message", e.getMessage()));
+
+        } catch (Exception e) {
+            log.error("Internal server error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Ошибка при создании пользователя"));
+        }
+    }
+
+
+
+    private String generatePassword(int length) {
+        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(charSet.length());
+            password.append(charSet.charAt(index));
+        }
+
+        return password.toString();
+    }
 }

@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход</title>
+    <title>Система поддержки - Главная</title>
     <link rel="stylesheet" href="/css/support/support.css"/>
     <link rel="stylesheet" href="/css/loading.css"/>
     <link rel="stylesheet" href="/css/support/support-table.css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="loading">
     <div id="preloader">
@@ -14,45 +15,120 @@
     </div>
 
     <div class="main-content">
-        <header>
-            <a href="/" id="logo">Ticket</a>
-            <div id="user-info">
-                <span>Добро пожаловать&nbsp</span>
-                <span>|</span>
-                <a href="/support/account/myAccount" class="orange-link processor-menu user-menu">Мои настройки</a>
-                <span class="processor-menu user-menu">|</span>
-                <a href="/logout" class="orange-link">Выйти</a>
+        <!-- Современный header с градиентом -->
+        <header class="modern-header">
+            <div class="header-container">
+                <div class="logo-section">
+                    <a href="/" id="logo">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>TicketSystem</span>
+                    </a>
+                </div>
+                <div id="user-info">
+                    <div class="user-welcome">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Добро пожаловать</span>
+                    </div>
+                    <div class="user-actions">
+                        <a href="/support/account/myAccount" class="user-action-btn">
+                            <i class="fas fa-cog"></i>
+                            <span>Настройки</span>
+                        </a>
+                        <a href="/logout" class="user-action-btn logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Выйти</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </header>
-        <div class="body">
-            <nav>
-                <div id="logout-form">
-                    <input type="text" name="title">
-                    <input class="btn-logout" type="submit" value="Поиск">
-                </div>
-                <a href="/" class="orange-link active admin-menu">Главная страница</a>
-                <a href="/create" class="orange-link processor-menu">Создать задачу</a>
-                <a href="/support/close" class="orange-link">Закрытые запросы</a>
-                <a href="/support/AllAccount" class="orange-link processor-menu user-menu">Пользователи</a>
-                <a href="/MyAccount" class="orange-link">Мой аккаунт</a>
-            </nav>
-            <table>
-                <thead>
-                <tr>
-                    <th class="request">ID</th>
-                    <th class="date">Дата</th>
-                    <th class="time">Время</th>
-                    <th class="tema">Тема</th>
-                    <th class="priority">Приоритет</th>
-                    <th class="from">От</th>
-                    <th class="status">Статус</th>
-                    <th class="edit">Действие</th>
-                </tr>
-                </thead>
-                <tbody>
 
-                </tbody>
-            </table>
+        <div class="body">
+            <!-- Современная навигация -->
+            <nav class="modern-nav">
+                <div class="nav-left">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="title" placeholder="Поиск по тикетам...">
+                            <button class="search-btn" type="submit">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nav-center">
+                    <a href="/" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Главная</span>
+                    </a>
+                    <a href="/create" class="nav-link user-menu">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Создать задачу</span>
+                    </a>
+                    <a href="/support/close" class="nav-link processor-menu user-menu">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Закрытые запросы</span>
+                    </a>
+                    <a href="/support/AllAccount" class="nav-link processor-menu">
+                        <i class="fas fa-users"></i>
+                        <span>Пользователи</span>
+                    </a>
+                    <a href="/MyAccount" class="nav-link processor-menu user-menu">
+                        <i class="fas fa-user"></i>
+                        <span>Мой аккаунт</span>
+                    </a>
+                </div>
+
+                <div class="nav-right">
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span class="stat-number" id="total-tickets">0</span>
+                            <span class="stat-label">Всего тикетов</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            <span class="stat-number" id="open-tickets">0</span>
+                            <span class="stat-label">Открытых</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Современная таблица -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2><i class="fas fa-list"></i> Список тикетов</h2>
+                    <div class="table-actions">
+                        <button class="refresh-btn" onclick="refreshTable()">
+                            <i class="fas fa-sync-alt"></i>
+                            Обновить
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table class="modern-table">
+                        <thead>
+                        <tr>
+                            <th class="request"><i class="fas fa-hashtag"></i> ID</th>
+                            <th class="date"><i class="fas fa-calendar"></i> Дата</th>
+                            <th class="time"><i class="fas fa-clock"></i> Время</th>
+                            <th class="tema"><i class="fas fa-tag"></i> Тема</th>
+                            <th class="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет</th>
+                            <th class="from"><i class="fas fa-user"></i> От</th>
+                            <th class="status"><i class="fas fa-info-circle"></i> Статус</th>
+                            <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tickets-tbody">
+                            <!-- Данные будут загружены через JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </body>

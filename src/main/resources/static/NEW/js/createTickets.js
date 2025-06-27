@@ -1,18 +1,15 @@
-$('#select-user').one('click', function () {
+$(document).on('click', '#select-user', function () {
+    console.log('click');
     $.ajax({
         url: '/getDTOUser',
         method: 'GET',
         success: function(data) {
-            // Очищаем список, оставляем только placeholder
             $('#select-user').find('option:not([disabled])').remove();
-
             data.forEach(function(user) {
                 const optionText = `${user.firstName} ${user.lastName} (${user.email})`;
                 const option = new Option(optionText, user.id);
                 $('#select-user').append(option);
             });
-
-            usersLoaded = true; // ставим флаг
         },
         error: function (xhr, status, error) {
             console.error("Error: ", error, status, xhr);
@@ -20,6 +17,7 @@ $('#select-user').one('click', function () {
         }
     });
 });
+
 
 $('#create-request-form').on('submit', async function (event) {
     event.preventDefault(); // Останавливаем стандартное отправление формы
@@ -84,6 +82,9 @@ $('#create-request-form').on('submit', async function (event) {
             success: function(data) {
                 console.log('Request created:', data);
                 showNotification(data.message, 'success');
+                setTimeout(function() {
+                    window.location.hash = '#'; // или '#allTickets'
+                }, 500);
             },
             error: function(error) {
                 console.error('Error:', error);

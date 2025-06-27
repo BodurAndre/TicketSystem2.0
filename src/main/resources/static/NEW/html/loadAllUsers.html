@@ -1,8 +1,19 @@
 <div class="table-container">
     <div class="table-header">
         <h2><i class="fas fa-users"></i> Список пользователей</h2>
-        <div class="table-actions">
-            <a href="#createUser" class="refresh-btn">
+        <div class="table-actions" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <select id="filter-role" style="height:40px;min-width:120px;max-width:150px;padding:0 10px;border-radius:8px;font-size:1em;">
+                <option value="ALL">Любая роль</option>
+                <option value="ADMIN">Админ</option>
+                <option value="USER">Пользователь</option>
+                <option value="PROCESSOR">Оператор</option>
+            </select>
+            <select id="filter-gender" style="height:40px;min-width:120px;max-width:150px;padding:0 10px;border-radius:8px;font-size:1em;">
+                <option value="ALL">Любой пол</option>
+                <option value="MALE">Мужской</option>
+                <option value="FEMALE">Женский</option>
+            </select>
+            <a href="#createUser" class="refresh-btn" style="height:40px;min-width:150px;display:flex;align-items:center;gap:6px;">
                 <i class="fas fa-user-plus"></i> Создать пользователя
             </a>
         </div>
@@ -11,12 +22,12 @@
         <table class="modern-table" id="usersTable">
             <thead>
             <tr>
-                <th class="request"><i class="fas fa-hashtag"></i> ID</th>
-                <th class="email"><i class="fas fa-envelope"></i> Email</th>
-                <th class="firstName"><i class="fas fa-user"></i> Имя</th>
-                <th class="lastName"><i class="fas fa-user"></i> Фамилия</th>
-                <th class="gender"><i class="fas fa-venus-mars"></i> Пол</th>
-                <th class="role"><i class="fas fa-user-tag"></i> Роль</th>
+                <th class="request" data-sort="id"><i class="fas fa-hashtag"></i> ID <span class="sort-arrow" id="sort-id"></span></th>
+                <th class="email" data-sort="email"><i class="fas fa-envelope"></i> Email <span class="sort-arrow" id="sort-email"></span></th>
+                <th class="firstName" data-sort="firstName"><i class="fas fa-user"></i> Имя <span class="sort-arrow" id="sort-firstName"></span></th>
+                <th class="lastName" data-sort="lastName"><i class="fas fa-user"></i> Фамилия <span class="sort-arrow" id="sort-lastName"></span></th>
+                <th class="gender" data-sort="gender"><i class="fas fa-venus-mars"></i> Пол <span class="sort-arrow" id="sort-gender"></span></th>
+                <th class="role" data-sort="role"><i class="fas fa-user-tag"></i> Роль <span class="sort-arrow" id="sort-role"></span></th>
                 <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
             </tr>
             </thead>

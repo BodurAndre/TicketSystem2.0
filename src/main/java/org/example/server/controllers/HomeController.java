@@ -19,70 +19,9 @@ import java.util.stream.Collectors;
 @Controller
 public class HomeController {
 
-
     @GetMapping(value = "/")
     public String home(){
-        return "NEW_HTML/index";
+        return "index";
     }
 
-    @GetMapping(value = "/create")
-    public String create(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        boolean isAdmin = authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-        boolean isUser = authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_USER"));
-
-        if (isAdmin || isUser) {
-            return "support/support-create"; // Возвращаем имя шаблона для редактирования
-        } else {
-            return "403";
-        }
-    }
-
-    @GetMapping(value = "/editRequest/{id}")
-    public String editRequest() {
-        return "support/support-edit"; // Возвращаем имя шаблона для редактирования
-    }
-
-    @GetMapping(value = "/account/CreateUser")
-    public String createUser() {
-        return "support/account/create-user";
-    }
-
-    @GetMapping(value = "/support/close")
-    public String close(){
-        return "support/support-close";
-    }
-
-    @GetMapping(value = "/support/AllAccount")
-    public String users(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        boolean isAdmin = authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        if (isAdmin) {
-            return "support/account/support-users"; // Возвращаем имя шаблона для редактирования
-        } else {
-            return "403";
-        }
-    }
-
-    @GetMapping(value = "/editUser/{id}")
-    public String editUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        boolean isAdmin = authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        if (isAdmin) {
-            return "support/account/user-edit"; // Возвращаем имя шаблона для редактирования// Возвращаем имя шаблона для редактирования
-        } else {
-            return "403";
-        }
-    }
 }

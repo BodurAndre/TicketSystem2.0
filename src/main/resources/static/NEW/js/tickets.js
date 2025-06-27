@@ -3,6 +3,10 @@
 // Импортируем showNotification из глобального window (оригинальный дизайн)
 const showNotification = window.showNotification;
 
+let allTickets = [];
+let currentSort = { field: null, asc: true };
+let currentFilters = { search: '', status: 'ALL', priority: 'ALL' };
+
 export async function init() {
     await renderTicketsPage();
     // Обновляем статистику после полной загрузки страницы
@@ -15,6 +19,17 @@ export async function renderTicketsPage() {
         <div class="table-header">
             <h2><i class="fas fa-list"></i> Список тикетов</h2>
             <div class="table-actions">
+                <select id="filter-status" style="margin-right:8px; padding:8px 12px; border-radius:8px;">
+                    <option value="ALL">Все статусы</option>
+                    <option value="OPEN">Открытые</option>
+                    <option value="CLOSED">Закрытые</option>
+                </select>
+                <select id="filter-priority" style="margin-right:8px; padding:8px 12px; border-radius:8px;">
+                    <option value="ALL">Любой приоритет</option>
+                    <option value="HIGH">Высокий</option>
+                    <option value="MEDIUM">Средний</option>
+                    <option value="LOW">Низкий</option>
+                </select>
                 <button class="refresh-btn" id="refresh-tickets-btn">
                     <i class="fas fa-sync-alt"></i> Обновить
                 </button>
@@ -24,13 +39,13 @@ export async function renderTicketsPage() {
             <table class="modern-table">
                 <thead>
                     <tr>
-                        <th class="request"><i class="fas fa-hashtag"></i> ID</th>
-                        <th class="date"><i class="fas fa-calendar"></i> Дата</th>
-                        <th class="time"><i class="fas fa-clock"></i> Время</th>
-                        <th class="tema"><i class="fas fa-tag"></i> Тема</th>
-                        <th class="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет</th>
-                        <th class="from"><i class="fas fa-user"></i> От</th>
-                        <th class="status"><i class="fas fa-info-circle"></i> Статус</th>
+                        <th class="request" data-sort="id"><i class="fas fa-hashtag"></i> ID <span class="sort-arrow" id="sort-id"></span></th>
+                        <th class="date" data-sort="data"><i class="fas fa-calendar"></i> Дата <span class="sort-arrow" id="sort-data"></span></th>
+                        <th class="time" data-sort="time"><i class="fas fa-clock"></i> Время <span class="sort-arrow" id="sort-time"></span></th>
+                        <th class="tema" data-sort="tema"><i class="fas fa-tag"></i> Тема <span class="sort-arrow" id="sort-tema"></span></th>
+                        <th class="priority" data-sort="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет <span class="sort-arrow" id="sort-priority"></span></th>
+                        <th class="from" data-sort="from"><i class="fas fa-user"></i> От <span class="sort-arrow" id="sort-from"></span></th>
+                        <th class="status" data-sort="status"><i class="fas fa-info-circle"></i> Статус <span class="sort-arrow" id="sort-status"></span></th>
                         <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
                     </tr>
                 </thead>
@@ -39,6 +54,36 @@ export async function renderTicketsPage() {
         </div>
     `;
     document.getElementById('refresh-tickets-btn').onclick = loadTickets;
+    document.getElementById('filter-status').onchange = (e) => {
+        currentFilters.status = e.target.value;
+        renderFilteredTickets();
+    };
+    document.getElementById('filter-priority').onchange = (e) => {
+        currentFilters.priority = e.target.value;
+        renderFilteredTickets();
+    };
+    // Сортировка по клику на th
+    document.querySelectorAll('.modern-table th[data-sort]').forEach(th => {
+        th.style.cursor = 'pointer';
+        th.onclick = () => {
+            const field = th.getAttribute('data-sort');
+            if (currentSort.field === field) {
+                currentSort.asc = !currentSort.asc;
+            } else {
+                currentSort.field = field;
+                currentSort.asc = true;
+            }
+            renderFilteredTickets();
+        };
+    });
+    // Навешиваем глобальный поиск
+    const globalSearch = document.querySelector('input[name="title"]');
+    if (globalSearch) {
+        globalSearch.oninput = (e) => {
+            currentFilters.search = e.target.value;
+            renderFilteredTickets();
+        };
+    }
     await loadTickets();
 }
 
@@ -50,14 +95,61 @@ async function loadTickets() {
         if (!response.ok) throw new Error('Ошибка загрузки тикетов');
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error('Некорректный формат данных');
-        tbody.innerHTML = '';
-        data.forEach(ticket => {
-            tbody.appendChild(createTicketRow(ticket));
-        });
-        // Обновляем статистику после загрузки тикетов
+        allTickets = data;
+        renderFilteredTickets();
         await updateTicketStats();
     } catch (e) {
         tbody.innerHTML = `<tr><td colspan="8" style="color:red;">${e.message}</td></tr>`;
+    }
+}
+
+function renderFilteredTickets() {
+    const tbody = document.getElementById('tickets-tbody');
+    let filtered = allTickets.filter(ticket => {
+        // Поиск по теме, описанию, пользователю
+        const search = currentFilters.search.trim().toLowerCase();
+        let match = true;
+        if (search) {
+            match = (
+                (ticket.tema && ticket.tema.toLowerCase().includes(search)) ||
+                (ticket.description && ticket.description.toLowerCase().includes(search)) ||
+                (ticket.createUser && ((ticket.createUser.firstName + ' ' + ticket.createUser.lastName).toLowerCase().includes(search)))
+            );
+        }
+        if (currentFilters.status !== 'ALL' && String(ticket.status).toUpperCase() !== currentFilters.status) return false;
+        if (currentFilters.priority !== 'ALL' && String(ticket.priority).toUpperCase() !== currentFilters.priority) return false;
+        return match;
+    });
+    // Сортировка
+    if (currentSort.field) {
+        filtered.sort((a, b) => {
+            let v1 = a[currentSort.field];
+            let v2 = b[currentSort.field];
+            if (currentSort.field === 'from') {
+                v1 = a.createUser ? (a.createUser.firstName + ' ' + a.createUser.lastName) : '';
+                v2 = b.createUser ? (b.createUser.firstName + ' ' + b.createUser.lastName) : '';
+            }
+            if (typeof v1 === 'string') v1 = v1.toLowerCase();
+            if (typeof v2 === 'string') v2 = v2.toLowerCase();
+            if (v1 < v2) return currentSort.asc ? -1 : 1;
+            if (v1 > v2) return currentSort.asc ? 1 : -1;
+            return 0;
+        });
+    }
+    // Стилизация стрелок сортировки
+    document.querySelectorAll('.sort-arrow').forEach(el => el.innerHTML = '');
+    if (currentSort.field) {
+        const arrow = document.getElementById('sort-' + currentSort.field);
+        if (arrow) {
+            arrow.innerHTML = currentSort.asc ? '<i class="fas fa-chevron-up" style="color:#3498db;font-size:0.9em;"></i>' : '<i class="fas fa-chevron-down" style="color:#3498db;font-size:0.9em;"></i>';
+        }
+    }
+    tbody.innerHTML = '';
+    filtered.forEach(ticket => {
+        tbody.appendChild(createTicketRow(ticket));
+    });
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;">Нет заявок</td></tr>';
     }
 }
 
@@ -134,7 +226,16 @@ function createTicketRow(ticket) {
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
-    const d = new Date(dateStr);
+    // Пробуем ISO, dd.MM.yyyy, yyyy-MM-dd, и т.д.
+    let d = null;
+    if (!isNaN(Date.parse(dateStr))) {
+        d = new Date(dateStr);
+    } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(dateStr)) {
+        // dd.MM.yyyy
+        const [day, month, year] = dateStr.split('.');
+        d = new Date(`${year}-${month}-${day}`);
+    }
+    if (!d || isNaN(d.getTime())) return dateStr;
     return d.toLocaleDateString('ru-RU');
 }
 function formatTime(timeStr) {

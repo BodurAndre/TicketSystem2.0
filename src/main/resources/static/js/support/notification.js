@@ -1,45 +1,85 @@
-function showNotification(message, isSuccess = false) {
+function showNotification(message, type = 'info') {
     // Удаляем существующее уведомление, если оно есть
-    const existingNotification = document.querySelector('.custom-notification');
+    const existingNotification = document.querySelector('.custom-notification, .notification');
     if (existingNotification) {
         existingNotification.remove();
     }
 
     // Создаем элемент уведомления
     const notification = document.createElement('div');
-    notification.classList.add('custom-notification');
-    notification.textContent = message;
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${getNotificationIcon(type)}"></i>
+        <span>${message}</span>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
 
-    // Устанавливаем начальные стили
-    notification.style.position = 'fixed';
-    notification.style.top = '50px';
-    notification.style.right = '60px';
-    notification.style.backgroundColor = isSuccess ? '#4CAF50' : '#f44336'; // Зеленый для успеха, красный для ошибки
-    notification.style.color = 'white';
-    notification.style.padding = '10px 20px';
-    notification.style.borderRadius = '5px';
-    notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-    notification.style.fontSize = '16px';
-    notification.style.zIndex = '9999'; // Убедитесь, что окно сверху
-    notification.style.opacity = '0'; // Начальное состояние (прозрачное)
-    notification.style.transform = 'scale(0.9)'; // Начальное состояние (уменьшенное)
-    notification.style.transition = 'opacity 0.5s, transform 0.5s'; // Анимации для появления и исчезновения
+    // Добавляем стили
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${getNotificationColor(type)};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 10000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        max-width: 300px;
+    `;
 
-    // Добавляем уведомление в body
     document.body.appendChild(notification);
 
-    // Появление (анимация)
+    // Анимация появления
     setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'scale(1)';
-    }, 10); // Небольшая задержка для срабатывания CSS-транзишена
+        notification.style.transform = 'translateX(0)';
+    }, 100);
 
-    // Автоматическое исчезновение
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'scale(0.9)'; // Уменьшение при исчезновении
+    // Кнопка закрытия
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.addEventListener('click', () => {
+        notification.style.transform = 'translateX(400px)';
         setTimeout(() => {
-            notification.remove();
-        }, 500); // Удаление после анимации исчезновения
+            document.body.removeChild(notification);
+        }, 300);
+    });
+
+    // Автоматическое закрытие
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }
     }, 5000);
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        'success': 'check-circle',
+        'error': 'exclamation-circle',
+        'warning': 'exclamation-triangle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+}
+
+function getNotificationColor(type) {
+    const colors = {
+        'success': 'linear-gradient(135deg, #27ae60, #2ecc71)',
+        'error': 'linear-gradient(135deg, #e74c3c, #c0392b)',
+        'warning': 'linear-gradient(135deg, #f39c12, #e67e22)',
+        'info': 'linear-gradient(135deg, #3498db, #2980b9)'
+    };
+    return colors[type] || colors.info;
 }

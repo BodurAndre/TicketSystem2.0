@@ -16,7 +16,7 @@ async function loadRequestData(id) {
         const response = await fetch(`/getRequest/${id}`);
         if (response.status === 403) {
             const errorMessage = await response.text(); // читаем текст с сервера
-            showNotification(errorMessage, false); // выводим уведомление
+            showNotification(errorMessage, 'error'); // выводим уведомление
             return; // и не ломаем страницу
         }
         if (!response.ok) throw new Error("Ошибка при загрузке данных");

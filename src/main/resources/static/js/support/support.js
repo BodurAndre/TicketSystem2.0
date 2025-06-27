@@ -316,6 +316,7 @@ function editTicket(id) {
 
 function deleteTicket(id) {
     if (confirm(`Вы уверены, что хотите удалить тикет #${id}?`)) {
+
         showNotification(`Тикет #${id} удален`, 'success');
         // Здесь будет логика удаления
     }

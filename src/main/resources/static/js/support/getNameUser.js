@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 error: function (xhr, status, error) {
                     console.error("Error: ", error, status, xhr);
-                    showNotification(xhr.responseText, false);
+                    showNotification(xhr.responseText, 'error');
                 }
             });
         }

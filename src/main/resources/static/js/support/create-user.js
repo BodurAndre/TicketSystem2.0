@@ -39,12 +39,12 @@ document.getElementById('create-user').addEventListener('click', async function 
             error: function (error) {
                 console.error("Error:", error);
                 const message = error.responseJSON?.message || "Неизвестная ошибка";
-                showNotification(message, false);
+                showNotification(message, 'error');
             }
         });
     } catch (error) {
         console.error("Error:", error);
-        showNotification("Ошибка", false);
+        showNotification("Ошибка", 'error');
     }
 });
 

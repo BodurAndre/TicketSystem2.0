@@ -34,13 +34,35 @@ document.addEventListener("DOMContentLoaded", function () {
                 cellRole.textContent = user.role;
                 row.appendChild(cellRole);
 
+                let cellActions = document.createElement('td');
+                cellActions.className = 'edit';
+                let actionDiv = document.createElement('div');
+                actionDiv.className = 'action-buttons';
+
+                // Кнопка редактировать
                 let editBtn = document.createElement('button');
-                editBtn.classList.add('edit-btn');
-                editBtn.innerHTML = '<img src="/icon/edit.png" alt="Edit" width="20" height="20">';
+                editBtn.className = 'action-btn edit';
+                editBtn.title = 'Редактировать';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
                 editBtn.addEventListener('click', function () {
                     window.location.href = '/editUser/' + user.id;
                 });
-                row.appendChild(editBtn);
+                actionDiv.appendChild(editBtn);
+
+                // Кнопка удалить
+                let deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn delete';
+                deleteBtn.title = 'Удалить';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', function () {
+                    if (confirm(`Вы уверены, что хотите удалить пользователя #${user.id}?`)) {
+                        deleteUser(user.id);
+                    }
+                });
+                actionDiv.appendChild(deleteBtn);
+
+                cellActions.appendChild(actionDiv);
+                row.appendChild(cellActions);
 
                 tableBody.appendChild(row);
             });
@@ -107,3 +129,42 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+// Добавляю функцию удаления пользователя
+async function deleteUser(userId) {
+    try {
+        const csrf = await getCsrfToken();
+        $.ajax({
+            url: '/deleteUser',
+            method: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(userId),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function (data) {
+                showNotification(data.message || `Пользователь #${userId} успешно удалён`, 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            },
+            error: function (error) {
+                showNotification('Ошибка удаления: ' + (error.responseJSON?.error || error.statusText), 'error');
+            }
+        });
+    } catch (error) {
+        showNotification('Ошибка CSRF', 'error');
+    }
+}
+
+// Функция получения CSRF-токена
+async function getCsrfToken() {
+    return $.ajax({
+        url: '/csrf-token',
+        method: 'GET',
+        dataType: 'json',
+        xhrFields: { withCredentials: true }
+    }).then(data => ({ headerName: data.headerName, token: data.token }))
+      .catch(() => {
+        console.error('Error fetching CSRF token');
+        throw new Error('CSRF token error');
+      });
+}

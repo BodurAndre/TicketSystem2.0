@@ -89,5 +89,4 @@ public class RequestService {
         List<Request> requests =  requestRepository.findByStatusAndCreateUser_Email("CLOSED", email);
         return requests.isEmpty() ? new ArrayList<>() : requests;
     }
-
 }

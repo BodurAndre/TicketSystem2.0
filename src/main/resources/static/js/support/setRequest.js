@@ -60,15 +60,15 @@ $('#create-request-form').on('submit', async function (event) {
             },
             success: function(data) {
                 console.log('Request created:', data);
-                showNotification(data.message, true);
+                showNotification(data.message, 'success');
             },
             error: function(error) {
                 console.error('Error:', error);
-                showNotification("Code " + error.status + " : " + error.responseJSON.error, false);
+                showNotification("Code " + error.status + " : " + error.responseJSON.error, 'error');
             }
         });
     } catch (error) {
         console.error('Error:', error);
-        showNotification('Ошибка', false);
+        showNotification('Ошибка', 'error');
     }
 });

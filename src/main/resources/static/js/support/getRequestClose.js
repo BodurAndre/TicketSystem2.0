@@ -55,13 +55,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 cellStatus.textContent = request.status;
                 row.appendChild(cellStatus);
 
-                // Кнопка редактирования
-                let editBtn = document.createElement('button');
-                editBtn.innerHTML = '<img src="/icon/edit.png" alt="Edit" width="20" height="20">'; // Замените на вашу картинку редактирования
-                editBtn.addEventListener('click', function() {
-                    window.location.href = '/editRequest/' + request.id; // Переход на страницу редактирования с передачей id
+                // Действие (восстановить/удалить)
+                let cellAction = document.createElement('td');
+                cellAction.className = 'edit';
+                let actionDiv = document.createElement('div');
+                actionDiv.className = 'action-buttons';
+
+                // Кнопка восстановить
+                let restoreBtn = document.createElement('button');
+                restoreBtn.className = 'action-btn edit';
+                restoreBtn.title = 'Восстановить';
+                restoreBtn.innerHTML = '<i class="fas fa-undo"></i>';
+                restoreBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showRestoreModal(request.id);
                 });
-                row.appendChild(editBtn);
+                actionDiv.appendChild(restoreBtn);
+
+                cellAction.appendChild(actionDiv);
+                row.appendChild(cellAction);
 
                 // Добавляем строку в таблицу
                 tableBody.appendChild(row);
@@ -128,3 +140,135 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+// Модальное окно подтверждения удаления
+function showDeleteModal(requestId) {
+    document.getElementById('delete-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'delete-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.3)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '10001';
+
+    modal.innerHTML = `
+        <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
+            <h3 style="margin-bottom: 18px; color: #e74c3c;"><i class='fas fa-exclamation-triangle'></i> Подтвердите удаление</h3>
+            <p style="margin-bottom: 24px; color: #333;">Вы действительно хотите удалить заявку <b>#${requestId}</b>? Это действие необратимо.</p>
+            <div style="display: flex; gap: 18px; justify-content: center;">
+                <button id="delete-confirm" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Да, удалить</button>
+                <button id="delete-cancel" style="background: #f3f3f3; color: #333; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Нет</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('delete-cancel').onclick = () => modal.remove();
+    document.getElementById('delete-confirm').onclick = () => {
+        modal.remove();
+        deleteRequest(requestId);
+    };
+}
+
+// Модальное окно подтверждения восстановления
+function showRestoreModal(requestId) {
+    document.getElementById('restore-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'restore-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.3)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '10001';
+
+    modal.innerHTML = `
+        <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
+            <h3 style="margin-bottom: 18px; color: #27ae60;"><i class='fas fa-undo'></i> Подтвердите восстановление</h3>
+            <p style="margin-bottom: 24px; color: #333;">Вы действительно хотите восстановить заявку <b>#${requestId}</b>?</p>
+            <div style="display: flex; gap: 18px; justify-content: center;">
+                <button id="restore-confirm" style="background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Да, восстановить</button>
+                <button id="restore-cancel" style="background: #f3f3f3; color: #333; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Нет</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('restore-cancel').onclick = () => modal.remove();
+    document.getElementById('restore-confirm').onclick = () => {
+        modal.remove();
+        restoreRequest(requestId);
+    };
+}
+
+// Функция удаления заявки (реальный запрос)
+async function deleteRequest(requestId) {
+    try {
+        const csrf = await getCsrfToken();
+        $.ajax({
+            url: '/deleteRequest',
+            method: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(requestId),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function (data) {
+                showNotification(data.message || `Заявка #${requestId} успешно удалена`, 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            },
+            error: function (error) {
+                showNotification("Ошибка удаления: " + (error.responseJSON?.error || error.statusText), 'error');
+            }
+        });
+    } catch (error) {
+        showNotification("Ошибка CSRF", 'error');
+    }
+}
+
+// Функция восстановления заявки (реальный запрос)
+async function restoreRequest(requestId) {
+    try {
+        const csrf = await getCsrfToken();
+        $.ajax({
+            url: '/reopenRequest',
+            method: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(requestId),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function (data) {
+                showNotification(data.message || `Заявка #${requestId} успешно восстановлена`, 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            },
+            error: function (error) {
+                showNotification("Ошибка восстановления: " + (error.responseJSON?.error || error.statusText), 'error');
+            }
+        });
+    } catch (error) {
+        showNotification("Ошибка CSRF", 'error');
+    }
+}
+
+// Получение CSRF-токена (универсально)
+async function getCsrfToken() {
+    return $.ajax({
+        url: "/csrf-token",
+        method: "GET",
+        dataType: "json",
+        xhrFields: { withCredentials: true }
+    }).then(data => ({ headerName: data.headerName, token: data.token }))
+        .catch(() => {
+            showNotification("Ошибка получения CSRF", 'error');
+            throw new Error("CSRF token error");
+        });
+}

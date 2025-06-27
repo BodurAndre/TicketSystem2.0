@@ -175,9 +175,7 @@ $(document).on('click', '#close-request', async function () {
             success: function (data) {
                 console.log("Request close:", data);
                 showNotification(data.message, true);
-                window.refreshRequestData();
-                const closeButton = document.getElementById("close-request");
-                if (closeButton) closeButton.style.display = "none";
+                loadTicketData(requestId); // обновляем форму и кнопки
             },
             error: function (error) {
                 console.error("Error:", error);
@@ -205,7 +203,7 @@ $(document).on('click', '#reopen-request', async function () {
             success: function (data) {
                 console.log("Request reopen:", data);
                 showNotification(data.message, true);
-                window.refreshRequestData();
+                loadTicketData(requestId); // обновляем форму и кнопки
             },
             error: function (error) {
                 console.error("Error:", error);

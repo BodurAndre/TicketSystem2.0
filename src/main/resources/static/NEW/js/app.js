@@ -8,6 +8,10 @@ function route() {
     } else if (hash.startsWith('request-id')) {
         const id = hash.replace('request-id', '');
         loadPage('editRequest', id);
+    } else if (hash === 'closed') {
+        import('/NEW/js/tickets.js').then(module => module.renderClosedTicketsPage());
+    } else if (hash === 'loadAllTickets' || hash === '') {
+        loadPage('loadAllTickets');
     } else {
         loadPage(hash);
     }
@@ -15,36 +19,61 @@ function route() {
 
 
 async function loadPage(pageName, id = null) {
-    const container = document.getElementById('app');
+    const containerApp = document.getElementById('app');
+    const containerInformation = document.getElementById('information');
+
     try {
-        const html = await fetch(`/NEW/html/${pageName}.html`).then(r => r.text());
-        container.innerHTML = html;
+        const htmlApp = await fetch(`/NEW/html/${pageName}.html`).then(r => r.text());
+        const htmlInfo = await fetch(`/NEW/html/ticketInformation.html`).then(r => r.text());
+
+        containerApp.innerHTML = htmlApp;
+        if (containerInformation) {
+            containerInformation.innerHTML = htmlInfo;
+        }
 
         const scriptModule = await import(`/NEW/js/${pageName}.js?${Date.now()}`);
         if (scriptModule.init) {
-            scriptModule.init(id); // передаем id если есть
+            scriptModule.init(id);
         }
     } catch (err) {
-        container.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        containerApp.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        if (containerInformation) {
+            containerInformation.innerHTML = `<h2>Ошибка загрузки информации</h2>`;
+        }
         console.error(err);
     }
 }
-
 
 async function loadPageUsers() {
-    const container = document.getElementById('app');
-    console.log();
-    try {
-        const html = await fetch(`/NEW/html/loadAllUsers.html`).then(r => r.text());
-        container.innerHTML = html;
+    const containerApp = document.getElementById('app');
+    const containerInformation = document.getElementById('information');
 
-        const scriptModule = await import(`/NEW/js/loadAllUsers.js`);
-        if (scriptModule.init) scriptModule.init(); // вызываем init() если есть
+    try {
+        // Загружаем HTML-шаблоны
+        const htmlApp = await fetch(`/NEW/html/loadAllUsers.html`).then(r => r.text());
+        const htmlInfo = await fetch(`/NEW/html/userInformation.html`).then(r => r.text());
+
+        // Вставляем их в соответствующие контейнеры
+        containerApp.innerHTML = htmlApp;
+        if (containerInformation) {
+            containerInformation.innerHTML = htmlInfo;
+        }
+
+        // Импортируем JS-модуль и вызываем init
+        const scriptModule = await import(`/NEW/js/loadAllUsers.js?${Date.now()}`);
+        if (scriptModule.init) {
+            scriptModule.init();
+        }
+
     } catch (err) {
-        container.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        containerApp.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        if (containerInformation) {
+            containerInformation.innerHTML = `<h2>Ошибка загрузки информации</h2>`;
+        }
         console.error(err);
     }
 }
+
 
 function setActiveNav() {
     const hash = window.location.hash;

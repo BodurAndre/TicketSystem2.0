@@ -1,5 +1,14 @@
-export function init() {
-    refreshTable(); // вызывается при загрузке страницы
+// loadAllTickets.js — точка входа для главной страницы тикетов
+
+export async function init() {
+    // Импортируем функцию из tickets.js
+    const { renderTicketsPage, updateTicketStats } = await import('./tickets.js');
+    
+    // Рендерим страницу тикетов
+    await renderTicketsPage();
+    
+    // Обновляем статистику после полной загрузки
+    await updateTicketStats();
 }
 
 export function refreshTable() {

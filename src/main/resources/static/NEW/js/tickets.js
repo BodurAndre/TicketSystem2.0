@@ -1,6 +1,6 @@
 let allTickets = [];
 let currentSort = { field: null, asc: true };
-let currentFilters = { search: '', status: 'ALL', priority: 'ALL' };
+let currentFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL' };
 
 export async function init() {
     await renderTicketsPage();
@@ -14,17 +14,33 @@ export async function renderTicketsPage() {
         <div class="table-header">
             <h2><i class="fas fa-list"></i> Список тикетов</h2>
             <div class="table-actions">
-                <select id="filter-status" style="margin-right:8px; padding:8px 12px; border-radius:8px;">
-                    <option value="ALL">Все статусы</option>
-                    <option value="OPEN">Открытые</option>
-                    <option value="CLOSED">Закрытые</option>
-                </select>
-                <select id="filter-priority" style="margin-right:8px; padding:8px 12px; border-radius:8px;">
-                    <option value="ALL">Любой приоритет</option>
-                    <option value="HIGH">Высокий</option>
-                    <option value="MEDIUM">Средний</option>
-                    <option value="LOW">Низкий</option>
-                </select>
+                <div class="filter-group">
+                    <label for="filter-status">Статус:</label>
+                    <select id="filter-status" class="modern-filter">
+                        <option value="ALL">Все статусы</option>
+                        <option value="OPEN">Открытые</option>
+                        <option value="CLOSED">Закрытые</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-priority">Приоритет:</label>
+                    <select id="filter-priority" class="modern-filter">
+                        <option value="ALL">Любой приоритет</option>
+                        <option value="HIGH">Высокий</option>
+                        <option value="MEDIUM">Средний</option>
+                        <option value="LOW">Низкий</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-date">Дата:</label>
+                    <select id="filter-date" class="modern-filter">
+                        <option value="ALL">Все даты</option>
+                        <option value="TODAY">Сегодня</option>
+                        <option value="YESTERDAY">Вчера</option>
+                        <option value="WEEK">За неделю</option>
+                        <option value="MONTH">За месяц</option>
+                    </select>
+                </div>
                 <button class="refresh-btn" id="refresh-tickets-btn">
                     <i class="fas fa-sync-alt"></i> Обновить
                 </button>
@@ -55,6 +71,10 @@ export async function renderTicketsPage() {
     };
     document.getElementById('filter-priority').onchange = (e) => {
         currentFilters.priority = e.target.value;
+        renderFilteredTickets();
+    };
+    document.getElementById('filter-date').onchange = (e) => {
+        currentFilters.date = e.target.value;
         renderFilteredTickets();
     };
     // Сортировка по клику на th
@@ -117,6 +137,7 @@ function renderFilteredTickets() {
         }
         if (currentFilters.status !== 'ALL' && String(ticket.status).toUpperCase() !== currentFilters.status) return false;
         if (currentFilters.priority !== 'ALL' && String(ticket.priority).toUpperCase() !== currentFilters.priority) return false;
+        if (currentFilters.date !== 'ALL' && !isDateMatch(ticket.data)) return false;
         return match;
     });
     // Сортировка
@@ -255,6 +276,60 @@ function formatDate(dateStr) {
 function formatTime(timeStr) {
     if (!timeStr) return '—';
     return timeStr;
+}
+
+function isDateMatch(dateStr) {
+    if (!dateStr || currentFilters.date === 'ALL') return true;
+    
+    try {
+        let ticketDate;
+        
+        // Проверяем, если дата в формате DD.MM.YYYY
+        if (dateStr.includes('.')) {
+            const parts = dateStr.split('.');
+            if (parts.length === 3) {
+                const day = parts[0];
+                const month = parts[1];
+                const year = parts[2];
+                const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                ticketDate = new Date(isoDate);
+            }
+        } else {
+            ticketDate = new Date(dateStr);
+        }
+        
+        if (isNaN(ticketDate.getTime())) return false;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        
+        const monthAgo = new Date(today);
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        
+        ticketDate.setHours(0, 0, 0, 0);
+        
+        switch (currentFilters.date) {
+            case 'TODAY':
+                return ticketDate.getTime() === today.getTime();
+            case 'YESTERDAY':
+                return ticketDate.getTime() === yesterday.getTime();
+            case 'WEEK':
+                return ticketDate >= weekAgo && ticketDate <= today;
+            case 'MONTH':
+                return ticketDate >= monthAgo && ticketDate <= today;
+            default:
+                return true;
+        }
+    } catch (e) {
+        console.error('Ошибка при проверке даты:', e);
+        return false;
+    }
 }
 
 function getPriorityClass(priority) {

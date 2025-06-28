@@ -1,6 +1,6 @@
 // Делаем функцию closeModal глобально доступной
 window.closeModal = function() {
-    document.getElementById('userModal').style.display = 'none';
+    document.getElementById('userModal').classList.remove('active');
 
     // Очистка всех полей формы
     document.getElementById('firstName').value = '';
@@ -74,7 +74,7 @@ document.getElementById('create-user').addEventListener('click', async function 
 function showModal(email, password) {
     document.getElementById('modal-email').textContent = email;
     document.getElementById('modal-password').textContent = password;
-    document.getElementById('userModal').style.display = 'block';
+    document.getElementById('userModal').classList.add('active');
     
     // Добавляем обработчик клика вне модального окна
     document.getElementById('userModal').addEventListener('click', function(e) {
@@ -84,9 +84,10 @@ function showModal(email, password) {
     });
     
     // Добавляем обработчик клавиши Escape
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function escListener(e) {
         if (e.key === 'Escape') {
             window.closeModal();
+            document.removeEventListener('keydown', escListener);
         }
     });
 }

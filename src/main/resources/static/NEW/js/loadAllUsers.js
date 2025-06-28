@@ -82,28 +82,36 @@ function renderFilteredUsers() {
     tableBody.innerHTML = '';
     filtered.forEach(function(user) {
         let row = document.createElement('tr');
+        
         let cellId = document.createElement('td');
         cellId.textContent = user.id;
         row.appendChild(cellId);
+        
         let cellEmail = document.createElement('td');
         cellEmail.textContent = user.email;
         row.appendChild(cellEmail);
+        
         let cellFirstName = document.createElement('td');
         cellFirstName.textContent = user.firstName;
         row.appendChild(cellFirstName);
+        
         let cellLastName = document.createElement('td');
         cellLastName.textContent = user.lastName;
         row.appendChild(cellLastName);
+        
         let cellGender = document.createElement('td');
-        cellGender.textContent = user.gender;
+        cellGender.innerHTML = `<span class="gender-badge gender-${user.gender.toLowerCase()}">${user.gender}</span>`;
         row.appendChild(cellGender);
+        
         let cellRole = document.createElement('td');
-        cellRole.textContent = user.role;
+        cellRole.innerHTML = `<span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span>`;
         row.appendChild(cellRole);
+        
         let cellActions = document.createElement('td');
         cellActions.className = 'edit';
         let actionDiv = document.createElement('div');
         actionDiv.className = 'action-buttons';
+        
         let editBtn = document.createElement('button');
         editBtn.className = 'action-btn edit';
         editBtn.title = 'Редактировать';
@@ -112,6 +120,7 @@ function renderFilteredUsers() {
             window.location.href = '/editUser/' + user.id;
         });
         actionDiv.appendChild(editBtn);
+        
         let deleteBtn = document.createElement('button');
         deleteBtn.className = 'action-btn delete';
         deleteBtn.title = 'Удалить';
@@ -122,6 +131,7 @@ function renderFilteredUsers() {
             }
         });
         actionDiv.appendChild(deleteBtn);
+        
         cellActions.appendChild(actionDiv);
         row.appendChild(cellActions);
         tableBody.appendChild(row);

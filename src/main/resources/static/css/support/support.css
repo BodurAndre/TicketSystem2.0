@@ -306,6 +306,56 @@ body {
 .table-actions {
     display: flex;
     gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-group label {
+    font-size: 0.8em;
+    font-weight: 600;
+    color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.modern-filter {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.modern-filter:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    transform: translateY(-1px);
+}
+
+.modern-filter:hover {
+    border-color: #3498db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+.modern-filter option {
+    background: #fff;
+    color: #2c3e50;
+    padding: 8px;
 }
 
 .refresh-btn {
@@ -325,6 +375,30 @@ body {
 .refresh-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+}
+
+/* Стили для кнопки создания пользователя */
+a.refresh-btn {
+    text-decoration: none;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+a.refresh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    color: white;
+    text-decoration: none;
 }
 
 .table-wrapper {
@@ -409,6 +483,25 @@ body {
     font-weight: 500;
 }
 
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.status-open {
+    background: rgba(52, 152, 219, 0.1);
+    color: #2980b9;
+}
+
+.status-badge.status-closed {
+    background: rgba(39, 174, 96, 0.1);
+    color: #27ae60;
+}
+
 /* Стили для приоритетов */
 .priority-badge {
     padding: 6px 14px;
@@ -439,6 +532,64 @@ body {
     background: rgba(39, 174, 96, 0.15);
     color: #27ae60;
     border: 1px solid #27ae6022;
+}
+
+/* Стили для ролей пользователей */
+.role-badge {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    min-width: 80px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: none;
+}
+
+.role-badge.role-admin, .role-badge.role-ADMIN {
+    background: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+    border: 1px solid #e74c3c22;
+}
+
+.role-badge.role-processor, .role-badge.role-PROCESSOR {
+    background: rgba(243, 156, 18, 0.15);
+    color: #f39c12;
+    border: 1px solid #f39c1222;
+}
+
+.role-badge.role-user, .role-badge.role-USER {
+    background: rgba(39, 174, 96, 0.15);
+    color: #27ae60;
+    border: 1px solid #27ae6022;
+}
+
+/* Стили для пола пользователей */
+.gender-badge {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    min-width: 70px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: none;
+}
+
+.gender-badge.gender-male, .gender-badge.gender-MALE {
+    background: rgba(52, 152, 219, 0.15);
+    color: #3498db;
+    border: 1px solid #3498db22;
+}
+
+.gender-badge.gender-female, .gender-badge.gender-FEMALE {
+    background: rgba(155, 89, 182, 0.15);
+    color: #9b59b6;
+    border: 1px solid #9b59b622;
 }
 
 /* Кнопки действий */
@@ -504,6 +655,26 @@ body {
         flex-direction: column;
         gap: 15px;
         text-align: center;
+    }
+    
+    .table-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .modern-filter {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .refresh-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 

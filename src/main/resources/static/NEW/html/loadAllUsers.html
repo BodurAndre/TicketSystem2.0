@@ -1,19 +1,25 @@
 <div class="table-container">
     <div class="table-header">
         <h2><i class="fas fa-users"></i> Список пользователей</h2>
-        <div class="table-actions" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-            <select id="filter-role" style="height:40px;min-width:120px;max-width:150px;padding:0 10px;border-radius:8px;font-size:1em;">
-                <option value="ALL">Любая роль</option>
-                <option value="ADMIN">Админ</option>
-                <option value="USER">Пользователь</option>
-                <option value="PROCESSOR">Оператор</option>
-            </select>
-            <select id="filter-gender" style="height:40px;min-width:120px;max-width:150px;padding:0 10px;border-radius:8px;font-size:1em;">
-                <option value="ALL">Любой пол</option>
-                <option value="MALE">Мужской</option>
-                <option value="FEMALE">Женский</option>
-            </select>
-            <a href="#createUser" class="refresh-btn" style="height:40px;min-width:150px;display:flex;align-items:center;gap:6px;">
+        <div class="table-actions">
+            <div class="filter-group">
+                <label for="filter-role">Роль:</label>
+                <select id="filter-role" class="modern-filter">
+                    <option value="ALL">Любая роль</option>
+                    <option value="ADMIN">Админ</option>
+                    <option value="USER">Пользователь</option>
+                    <option value="PROCESSOR">Оператор</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-gender">Пол:</label>
+                <select id="filter-gender" class="modern-filter">
+                    <option value="ALL">Любой пол</option>
+                    <option value="MALE">Мужской</option>
+                    <option value="FEMALE">Женский</option>
+                </select>
+            </div>
+            <a href="#createUser" class="refresh-btn">
                 <i class="fas fa-user-plus"></i> Создать пользователя
             </a>
         </div>

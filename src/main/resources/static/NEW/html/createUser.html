@@ -5,18 +5,18 @@
     <div class="input-group">
       <div class="input-item">
         <label for="firstName">Имя:</label>
-        <input type="text" id="firstName">
+        <input type="text" id="firstName" placeholder="Введите имя">
       </div>
       <div class="input-item">
         <label for="lastName">Фамилия:</label>
-        <input type="text" id="lastName">
+        <input type="text" id="lastName" placeholder="Введите фамилию">
       </div>
     </div>
 
     <div class="input-group">
       <div class="input-item">
         <label for="email">Email:</label>
-        <input type="email" id="email">
+        <input type="email" id="email" placeholder="example@email.com">
       </div>
       <div class="input-item">
         <label for="role">Роль:</label>
@@ -45,11 +45,20 @@
         <label for="dateOfBirth">День рождения:</label>
         <input type="date" id="dateOfBirth">
       </div>
+    </div>
+
+    <div class="input-group">
       <div class="input-item">
         <label>Пол:</label>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <label><input type="radio" name="gender" value="Мужской"> Мужской</label>
-          <label><input type="radio" name="gender" value="Женский"> Женский</label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="gender" value="MALE">
+            <span>Мужской</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="gender" value="FEMALE">
+            <span>Женский</span>
+          </label>
         </div>
       </div>
     </div>
@@ -63,7 +72,7 @@
 </div>
 
 <!-- Модальное окно для отображения данных пользователя -->
-<div id="userModal" class="modal" style="display: none;">
+<div id="userModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3><i class="fas fa-user-check"></i> Пользователь успешно создан!</h3>
@@ -96,21 +105,29 @@
     z-index: 10000;
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
     background-color: rgba(0,0,0,0.5);
     backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .modal-content {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    margin: 5% auto;
-    padding: 0;
     border-radius: 15px;
     width: 90%;
     max-width: 500px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     animation: modalSlideIn 0.3s ease;
+    position: relative;
+    margin: 0;
+    max-height: 95vh;
+    overflow-y: auto;
 }
 
 @keyframes modalSlideIn {
@@ -126,17 +143,22 @@
 
 .modal-header {
     background: rgba(255,255,255,0.1);
-    padding: 20px;
+    padding: 15px;
     border-radius: 15px 15px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: white;
+    position: relative;
 }
 
 .modal-header h3 {
     margin: 0;
-    font-size: 1.2em;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
 }
 
 .close {
@@ -145,6 +167,11 @@
     font-weight: bold;
     cursor: pointer;
     transition: color 0.3s;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
 }
 
 .close:hover {
@@ -154,6 +181,7 @@
 .modal-body {
     padding: 30px 20px;
     color: white;
+    text-align: center;
 }
 
 .user-credentials {
@@ -161,6 +189,13 @@
     padding: 20px;
     border-radius: 10px;
     margin-top: 15px;
+    text-align: center;
+}
+
+.user-credentials p {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 600;
 }
 
 .credential-item {
@@ -171,11 +206,16 @@
     padding: 10px;
     background: rgba(255,255,255,0.1);
     border-radius: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .credential-item label {
     font-weight: bold;
     color: #f8f9fa;
+    white-space: nowrap;
+    min-width: 80px;
+    text-align: left;
 }
 
 .credential-value {
@@ -186,6 +226,10 @@
     font-weight: bold;
     color: #fff;
     border: 1px solid rgba(255,255,255,0.3);
+    word-break: break-all;
+    text-align: center;
+    flex: 1;
+    min-width: 0;
 }
 
 .modal-footer {
@@ -204,10 +248,122 @@
     font-size: 1em;
     font-weight: bold;
     transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 120px;
 }
 
 .modal-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
 }
+
+/* Адаптивные стили для модального окна */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 98%;
+        max-width: 98vw;
+        max-height: 98vh;
+    }
+    
+    .modal-header {
+        padding: 15px;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+    
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        transform: none;
+    }
+    
+    .modal-body {
+        padding: 20px 15px;
+    }
+    
+    .user-credentials {
+        padding: 15px;
+    }
+    
+    .credential-item {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .credential-item label {
+        font-size: 0.9em;
+        white-space: normal;
+        text-align: center;
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .credential-value {
+        font-size: 0.9em;
+        text-align: center;
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .modal-footer {
+        padding: 15px;
+    }
+    
+    .modal-btn {
+        width: 100%;
+        padding: 15px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal {
+        padding: 5px;
+    }
+    
+    .modal-content {
+        max-height: 98vh;
+        width: 100%;
+    }
+    
+    .modal-header {
+        padding: 12px;
+    }
+    
+    .modal-body {
+        padding: 15px 12px;
+    }
+    
+    .user-credentials {
+        padding: 12px;
+    }
+}
+
+#userModal {
+  display: none;
+}
+#userModal.active {
+  display: flex !important;
+}
 </style>
+
+<script>
+function showModal() {
+  const modal = document.getElementById('userModal');
+  modal.classList.add('active');
+}
+function closeModal() {
+  const modal = document.getElementById('userModal');
+  modal.classList.remove('active');
+}
+</script>

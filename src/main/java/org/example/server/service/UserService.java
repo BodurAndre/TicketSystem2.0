@@ -47,7 +47,6 @@ public class UserService {
         user.setGender(userCreateDTO.getGender());
         user.setDateOfBirth(userCreateDTO.getDateOfBirth());
         user.setRole(userCreateDTO.getRole());
-        user.setCountry(userCreateDTO.getCountry());
         user.setFirstLogin(true);
         userRepository.save(user);
         userRepository.flush();
@@ -78,7 +77,6 @@ public class UserService {
         user.setFirstName(userUpdateDTO.getFirstName());
         user.setLastName(userUpdateDTO.getLastName());
         user.setRole(userUpdateDTO.getRole());
-        user.setCountry(userUpdateDTO.getCountry());
         user.setDateOfBirth(userUpdateDTO.getDateOfBirth());
         user.setGender(userUpdateDTO.getGender());
         userRepository.save(user);

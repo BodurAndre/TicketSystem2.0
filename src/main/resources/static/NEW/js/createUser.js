@@ -20,26 +20,45 @@ window.closeModal = function() {
     }, 300);
 };
 
-document.getElementById('create-user').addEventListener('click', async function () {
+
+// --- Валидация формы ---
+function validateUserForm() {
+    const email = document.getElementById('email').value.trim();
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+
+    if (!firstName) {
+        showNotification('Введите имя', 'error');
+        return false;
+    }
+    if (!lastName) {
+        showNotification('Введите фамилию', 'error');
+        return false;
+    }
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        showNotification('Введите корректный email', 'error');
+        return false;
+    }
+    return true;
+}
+
+// --- Обработка кнопки создания пользователя ---
+const createUserBtn = document.getElementById('create-user');
+if (createUserBtn) {
+  createUserBtn.onclick = async function() {
+    if (!validateUserForm()) return;
     const firstName = document.getElementById('firstName').value.trim();
     const lastName = document.getElementById('lastName').value.trim();
     const email = document.getElementById('email').value.trim();
     const role = document.getElementById('role').value;
-    const country = document.getElementById('country').value;
     const dateOfBirth = document.getElementById('dateOfBirth').value;
     const gender = document.querySelector('input[name="gender"]:checked');
-
-    if (!firstName || !lastName || !email || !role || !country || !dateOfBirth || !gender) {
-        alert("Пожалуйста, заполните все поля.");
-        return;
-    }
 
     const data = {
         firstName: firstName,
         lastName: lastName,
         email: email,
         role: role,
-        country: country,
         dateOfBirth: dateOfBirth,
         gender: gender.value
     };
@@ -69,7 +88,8 @@ document.getElementById('create-user').addEventListener('click', async function 
         console.error("Error:", error);
         showNotification("Ошибка", 'error');
     }
-});
+  }
+}
 
 function showModal(email, password) {
     document.getElementById('modal-email').textContent = email;

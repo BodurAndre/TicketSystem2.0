@@ -34,9 +34,6 @@ public class User {
     @Column(name = "PROFILE_PHOTO_URL")
     private String profilePhotoUrl;
 
-    @Column(name = "COUNTRY")
-    private String country;
-
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "DATE_OF_BIRTH")
     private String dateOfBirth;
@@ -50,13 +47,12 @@ public class User {
     @Column(name = "FIRSTLOGIN")
     private Boolean firstLogin;
 
-    public User(String email, String password, String firstName, String lastName, String dateOfBirth, String country, String gender) {
+    public User(String email, String password, String firstName, String lastName, String dateOfBirth, String gender) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
-        this.country = country;
         this.gender = gender;
     }
 }

@@ -8,7 +8,6 @@ public class UserUpdateDTO {
     private String lastName;
     private String email;
     private String role;
-    private String country;
     private String dateOfBirth;
     private String gender;
     private Long userId;

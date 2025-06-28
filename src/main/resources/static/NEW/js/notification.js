@@ -83,3 +83,6 @@ function getNotificationColor(type) {
     };
     return colors[type] || colors.info;
 }
+
+// Делаем функцию глобально доступной
+window.showNotification = showNotification;

@@ -130,3 +130,18 @@ function renderFilteredUsers() {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;">Нет пользователей</td></tr>';
     }
 }
+
+function deleteUser(userId) {
+    $.ajax({
+        url: '/deleteUser/' + userId,
+        method: 'DELETE',
+        success: function(response) {
+            console.log('Пользователь успешно удален');
+            refreshTable(); // Обновляем таблицу после удаления
+        },
+        error: function(xhr, status, error) {
+            console.error("Ошибка при удалении пользователя: ", error);
+            alert('Ошибка при удалении пользователя');
+        }
+    });
+}

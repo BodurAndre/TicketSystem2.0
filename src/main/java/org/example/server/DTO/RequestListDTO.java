@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class RequestListDTO {
-    private Long ID;
+    private Long id;
     private String data;
     private String time;
     private String tema;

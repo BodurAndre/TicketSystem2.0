@@ -4,8 +4,10 @@ $(document).on('click', '#select-user', function () {
         url: '/getDTOUser',
         method: 'GET',
         success: function(data) {
+            console.log(data)
             $('#select-user').find('option:not([disabled])').remove();
             data.forEach(function(user) {
+                console.log(user)
                 const optionText = `${user.firstName} ${user.lastName} (${user.email})`;
                 const option = new Option(optionText, user.id);
                 $('#select-user').append(option);
@@ -83,7 +85,7 @@ $('#create-request-form').on('submit', async function (event) {
                 console.log('Request created:', data);
                 showNotification(data.message, 'success');
                 setTimeout(function() {
-                    window.location.hash = '#'; // или '#allTickets'
+                    window.location.hash = '#request-id' + data.id;
                 }, 500);
             },
             error: function(error) {

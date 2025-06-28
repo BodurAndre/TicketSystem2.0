@@ -1,8 +1,3 @@
-// tickets.js — загрузка и рендер всех тикетов
-
-// Импортируем showNotification из глобального window (оригинальный дизайн)
-const showNotification = window.showNotification;
-
 let allTickets = [];
 let currentSort = { field: null, asc: true };
 let currentFilters = { search: '', status: 'ALL', priority: 'ALL' };
@@ -89,6 +84,10 @@ export async function renderTicketsPage() {
 
 async function loadTickets() {
     const tbody = document.getElementById('tickets-tbody');
+    if (!tbody) {
+        console.warn('Element tickets-tbody not found');
+        return;
+    }
     tbody.innerHTML = '<tr><td colspan="8">Загрузка...</td></tr>';
     try {
         const response = await fetch('/requests');
@@ -155,6 +154,15 @@ function renderFilteredTickets() {
 
 // Функция для обновления статистики тикетов
 export async function updateTicketStats() {
+    // Проверяем, существуют ли элементы статистики
+    const totalTicketsElement = document.getElementById('total-tickets');
+    const openTicketsElement = document.getElementById('open-tickets');
+    
+    if (!totalTicketsElement && !openTicketsElement) {
+        console.warn('Statistics elements not found');
+        return;
+    }
+    
     try {
         // Получаем все тикеты
         const allTicketsResponse = await fetch('/requests');
@@ -167,9 +175,6 @@ export async function updateTicketStats() {
         const openTickets = await openTicketsResponse.json();
         
         // Обновляем DOM-элементы
-        const totalTicketsElement = document.getElementById('total-tickets');
-        const openTicketsElement = document.getElementById('open-tickets');
-        
         if (totalTicketsElement) {
             totalTicketsElement.textContent = Array.isArray(allTickets) ? allTickets.length : 0;
         }
@@ -180,9 +185,6 @@ export async function updateTicketStats() {
     } catch (e) {
         console.error('Ошибка обновления статистики тикетов:', e);
         // В случае ошибки устанавливаем 0
-        const totalTicketsElement = document.getElementById('total-tickets');
-        const openTicketsElement = document.getElementById('open-tickets');
-        
         if (totalTicketsElement) {
             totalTicketsElement.textContent = '0';
         }
@@ -207,6 +209,7 @@ function createTicketRow(ticket) {
             <button class="action-btn restore" title="Восстановить" onclick="showReopenModal(${ticket.id})"><i class="fas fa-undo"></i></button>
         `;
     }
+    
     tr.innerHTML = `
         <td class="request">#${ticket.id}</td>
         <td class="date">${formatDate(ticket.data)}</td>
@@ -225,42 +228,54 @@ function createTicketRow(ticket) {
 }
 
 function formatDate(dateStr) {
-    if (!dateStr) return '';
-    // Пробуем ISO, dd.MM.yyyy, yyyy-MM-dd, и т.д.
-    let d = null;
-    if (!isNaN(Date.parse(dateStr))) {
-        d = new Date(dateStr);
-    } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(dateStr)) {
-        // dd.MM.yyyy
-        const [day, month, year] = dateStr.split('.');
-        d = new Date(`${year}-${month}-${day}`);
+    if (!dateStr) return '—';
+    try {
+        // Проверяем, если дата уже в формате DD.MM.YYYY
+        if (dateStr.includes('.')) {
+            const parts = dateStr.split('.');
+            if (parts.length === 3) {
+                // Преобразуем DD.MM.YYYY в YYYY-MM-DD для JavaScript Date
+                const day = parts[0];
+                const month = parts[1];
+                const year = parts[2];
+                const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                const date = new Date(isoDate);
+                return date.toLocaleDateString('ru-RU');
+            }
+        }
+        // Если это другой формат, пробуем стандартный парсинг
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ru-RU');
+    } catch (e) {
+        // Если не удалось распарсить, возвращаем как есть
+        return dateStr;
     }
-    if (!d || isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('ru-RU');
 }
+
 function formatTime(timeStr) {
-    if (!timeStr) return '';
-    return timeStr.length > 5 ? timeStr.substring(0,5) : timeStr;
+    if (!timeStr) return '—';
+    return timeStr;
 }
+
 function getPriorityClass(priority) {
-    switch(priority) {
-        case 'HIGH': return 'priority-high';
-        case 'MEDIUM': return 'priority-medium';
-        case 'LOW': return 'priority-low';
-        default: return '';
-    }
+    const classes = {
+        'HIGH': 'priority-high',
+        'MEDIUM': 'priority-medium',
+        'LOW': 'priority-low'
+    };
+    return classes[priority] || 'priority-medium';
 }
+
 function getStatusClass(status) {
-    switch(status) {
-        case 'OPEN': return 'status-open';
-        case 'CLOSED': return 'status-closed';
-        default: return '';
-    }
+    const classes = {
+        'OPEN': 'status-open',
+        'CLOSED': 'status-closed'
+    };
+    return classes[status] || 'status-open';
 }
 
 // Модалка закрытия тикета
 window.showCloseModal = function(id) {
-    // Удаляем старое окно, если оно есть
     document.getElementById('close-modal')?.remove();
     const modal = document.createElement('div');
     modal.id = 'close-modal';
@@ -274,10 +289,9 @@ window.showCloseModal = function(id) {
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
     modal.style.zIndex = '10001';
-
     modal.innerHTML = `
         <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
-            <h3 style="margin-bottom: 18px; color: #e74c3c;"><i class='fas fa-exclamation-triangle'></i> Подтвердите закрытие</h3>
+            <h3 style="margin-bottom: 18px; color: #e74c3c;"><i class='fas fa-times-circle'></i> Подтвердите закрытие</h3>
             <p style="margin-bottom: 24px; color: #333;">Вы действительно хотите закрыть заявку <b>#${id}</b>?</p>
             <div style="display: flex; gap: 18px; justify-content: center;">
                 <button id="close-confirm" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Да, Закрыть</button>
@@ -308,88 +322,89 @@ async function closeRequest(requestId) {
         });
         if (!response.ok) throw new Error('Ошибка при закрытии заявки');
         const data = await response.json();
-        if (typeof showNotification === 'function') {
-            showNotification(data.message || 'Заявка закрыта!', 'success');
-        } else {
-            alert(data.message || 'Заявка закрыта!');
+        showNotification(data.message || 'Заявка закрыта!', 'success');
+        
+        // Проверяем, на какой странице мы находимся, и обновляем соответствующую таблицу
+        const closedTicketsTbody = document.getElementById('closed-tickets-tbody');
+        const ticketsTbody = document.getElementById('tickets-tbody');
+        
+        if (closedTicketsTbody) {
+            // Мы на странице закрытых заявок
+            await loadClosedTickets();
+        } else if (ticketsTbody) {
+            // Мы на странице всех заявок
+            await loadTickets();
         }
-        // После закрытия заявки переходим на закрытые заявки
-        window.location.hash = '#closed';
+        
+        // Обновляем статистику, если элементы существуют
+        const totalTicketsElement = document.getElementById('total-tickets');
+        const openTicketsElement = document.getElementById('open-tickets');
+        if (totalTicketsElement || openTicketsElement) {
+            await updateTicketStats();
+        }
     } catch (error) {
-        if (typeof showNotification === 'function') {
-            showNotification(error.message || 'Ошибка при закрытии', 'error');
-        } else {
-            alert(error.message || 'Ошибка при закрытии');
-        }
+        showNotification(error.message || 'Ошибка при закрытии', 'error');
     }
 }
 
-// Заглушка для страницы создания тикета
 export function renderCreateTicketPage() {
     const content = document.getElementById('app');
     content.innerHTML = `
-        <div class="spa-nav-links">
-            <span class="spa-link active">Создать тикет</span>
-            <span class="spa-link" id="spa-close-link">Закрытые заявки</span>
-            <span class="spa-link" id="spa-users-link">Пользователи</span>
-        </div>
-        <div class="table-header">
-            <h2><i class='fas fa-plus-circle'></i> Создать тикет</h2>
-        </div>
-        <div class="table-wrapper" style="max-width:600px;margin:0 auto;">
-            <form id="create-request-form">
-                <div class="input-group" style="display:flex;gap:16px;">
-                    <div class="input-item" style="flex:1;">
-                        <label for="tema">Заголовок:</label>
-                        <input type="text" id="tema" name="tema" placeholder="Введите тему" required style="width:100%;">
+        <div class="form-container">
+            <div class="form">
+                <h2><i class="fas fa-plus-circle"></i> Создание заявки</h2>
+                <form id="create-request-form">
+                    <div class="input-group">
+                        <div class="input-item">
+                            <label for="tema">Тема:</label>
+                            <input type="text" id="tema" name="tema" required>
+                        </div>
+                        <div class="input-item">
+                            <label for="priority">Приоритет:</label>
+                            <select id="priority" name="priority" required>
+                                <option value="">Выберите приоритет</option>
+                                <option value="HIGH">Высокий</option>
+                                <option value="MEDIUM">Средний</option>
+                                <option value="LOW">Низкий</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="input-item" style="flex:1;">
-                        <label for="priority">Приоритет:</label>
-                        <select id="priority" name="priority" required style="width:100%;">
-                            <option value="" disabled selected>Выберите приоритет</option>
-                            <option value="LOW">Низкий</option>
-                            <option value="MEDIUM">Средний</option>
-                            <option value="HIGH">Высокий</option>
-                        </select>
+                    <div class="input-group">
+                        <div class="input-item">
+                            <label for="description">Описание:</label>
+                            <textarea id="description" name="description" rows="4" required></textarea>
+                        </div>
                     </div>
-                </div>
-                <div class="input-group" style="margin-top:16px;">
-                    <div class="input-item" style="width:100%;">
-                        <label for="select-user">Пользователь:</label>
-                        <select id="select-user" name="userId" required style="width:100%;">
-                            <option value="" disabled selected>Выберите пользователя</option>
-                        </select>
+                    <div class="input-group">
+                        <div class="input-item">
+                            <label for="userId">Назначить пользователю:</label>
+                            <select id="userId" name="userId" required>
+                                <option value="">Выберите пользователя</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="input-group" style="margin-top:16px;">
-                    <label for="description">Описание:</label>
-                    <textarea id="description" name="description" placeholder="Введите описание" required style="width:100%;min-height:80px;"></textarea>
-                </div>
-                <div style="margin-top:24px;text-align:right;">
-                    <button id="open-request" type="submit" class="refresh-btn">
-                        <i class="fas fa-paper-plane"></i> Создать
-                    </button>
-                </div>
-            </form>
+                    <div class="button-group">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-plus"></i> Создать заявку
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     `;
-    document.getElementById('spa-close-link').onclick = () => {
-        window.location.hash = '#/close';
-    };
-    document.getElementById('spa-users-link').onclick = () => {
-        window.location.hash = '#/users';
-    };
+    
     loadUsersForSelect();
     bindCreateRequestForm();
 }
 
 function loadUsersForSelect() {
-    const select = document.getElementById('select-user');
-    select.innerHTML = '<option value="" disabled selected>Загрузка...</option>';
+    const select = document.getElementById('userId');
+    select.innerHTML = '<option value="" disabled selected>Загрузка пользователей...</option>';
+    
     fetch('/getDTOUser')
-        .then(r => r.json())
+        .then(response => response.json())
         .then(users => {
-            select.innerHTML = '<option value="" disabled selected>Выберите пользователя</option>';
+            select.innerHTML = '<option value="">Выберите пользователя</option>';
             users.forEach(user => {
                 const option = document.createElement('option');
                 option.value = user.id;
@@ -413,7 +428,15 @@ function bindCreateRequestForm() {
         if (!tema || !priority || !description || !userId) return;
         try {
             const csrf = await getCsrfToken();
+            
+            // Получаем текущую дату и время
+            const currentDate = new Date();
+            const date = currentDate.toLocaleDateString();
+            const time = currentDate.toLocaleTimeString();
+            
             const requestData = {
+                data: date,
+                time: time,
                 tema,
                 priority,
                 description,
@@ -430,18 +453,12 @@ function bindCreateRequestForm() {
             });
             if (!response.ok) throw new Error('Ошибка создания тикета');
             const data = await response.json();
-            if (typeof showNotification === 'function') {
-                showNotification(data.message || 'Тикет создан!', 'success');
-            } else {
-                alert(data.message || 'Тикет создан!');
-            }
-            setTimeout(() => window.location.hash = '#/', 1200);
+            showNotification(data.message || 'Тикет создан!', 'success');
+            setTimeout(() => {
+                window.location.hash = '#request-id' + data.id;
+            }, 1200);
         } catch (e) {
-            if (typeof showNotification === 'function') {
-                showNotification(e.message || 'Ошибка', 'error');
-            } else {
-                alert(e.message || 'Ошибка');
-            }
+            showNotification(e.message || 'Ошибка', 'error');
         }
     };
 }
@@ -503,6 +520,10 @@ export async function renderClosedTicketsPage() {
 
 async function loadClosedTickets() {
     const tbody = document.getElementById('closed-tickets-tbody');
+    if (!tbody) {
+        console.warn('Element closed-tickets-tbody not found');
+        return;
+    }
     tbody.innerHTML = '<tr><td colspan="8">Загрузка...</td></tr>';
     try {
         const response = await fetch('/getRequestsClose');
@@ -586,19 +607,27 @@ async function reopenRequest(requestId) {
         });
         if (!response.ok) throw new Error('Ошибка при восстановлении заявки');
         const data = await response.json();
-        if (typeof showNotification === 'function') {
-            showNotification(data.message || 'Заявка восстановлена!', 'success');
-        } else {
-            alert(data.message || 'Заявка восстановлена!');
+        showNotification(data.message || 'Заявка восстановлена!', 'success');
+        
+        // Проверяем, на какой странице мы находимся, и обновляем соответствующую таблицу
+        const closedTicketsTbody = document.getElementById('closed-tickets-tbody');
+        const ticketsTbody = document.getElementById('tickets-tbody');
+        
+        if (closedTicketsTbody) {
+            // Мы на странице закрытых заявок
+            await loadClosedTickets();
+        } else if (ticketsTbody) {
+            // Мы на странице всех заявок
+            await loadTickets();
         }
-        // Обновляем таблицу после восстановления
-        await loadClosedTickets();
-        await updateTicketStats();
+        
+        // Обновляем статистику, если элементы существуют
+        const totalTicketsElement = document.getElementById('total-tickets');
+        const openTicketsElement = document.getElementById('open-tickets');
+        if (totalTicketsElement || openTicketsElement) {
+            await updateTicketStats();
+        }
     } catch (error) {
-        if (typeof showNotification === 'function') {
-            showNotification(error.message || 'Ошибка при восстановлении', 'error');
-        } else {
-            alert(error.message || 'Ошибка при восстановлении');
-        }
+        showNotification(error.message || 'Ошибка при восстановлении', 'error');
     }
 } 

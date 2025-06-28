@@ -54,7 +54,12 @@ public class UserService {
     }
 
     public List<User> getAllUsersWithoutCurrentUser(String username) {
-        List<User> users = userRepository.findAllByEmailNotAndRoleNot(username, "USER");
+        List<User> users = userRepository.findAllByEmailNot(username);
+        return users.isEmpty() ? new ArrayList<>() : users;
+    }
+
+    public List<User> getAllUsersWithoutCurrentUserAndUser(String username) {
+        List<User> users = userRepository.findAllByEmailNotAndRoleNot(username,"USER");
         return users.isEmpty() ? new ArrayList<>() : users;
     }
 
@@ -77,5 +82,10 @@ public class UserService {
         user.setDateOfBirth(userUpdateDTO.getDateOfBirth());
         user.setGender(userUpdateDTO.getGender());
         userRepository.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        User user = getUser(id);
+        userRepository.delete(user);
     }
 }

@@ -259,9 +259,13 @@ public class SupportController {
             }
 
             // Сохраняем
-            requestService.setRequest(request);
+            Request savedRequest = requestService.setRequest(request);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("{\"message\": \"Заявка создана\"}");
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Заявка создана");
+            response.put("id", savedRequest != null ? savedRequest.getID() : null);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Ошибка в создании заявки\"}");
@@ -338,7 +342,7 @@ public class SupportController {
 
     private RequestListDTO mapToDTO(Request request) {
         RequestListDTO dto = new RequestListDTO();
-        dto.setID(request.getID());
+        dto.setId(request.getID());
         dto.setData(request.getData());
         dto.setTime(request.getTime());
         dto.setTema(request.getTema());

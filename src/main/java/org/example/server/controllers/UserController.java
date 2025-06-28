@@ -87,12 +87,12 @@ public class UserController {
             username = principal.toString();
         }
 
-        List<User> users = userService.getAllUsersWithoutCurrentUser(username);
+        List<User> users = userService.getAllUsersWithoutCurrentUserAndUser(username);
 
         List<UserDTO> userDTO = users.stream()
                 .map(user -> new UserDTO(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName()))
                 .collect(Collectors.toList());
-
+        log.warn("Пользователи" + userDTO);
         return ResponseEntity.ok(userDTO);
     }
 
@@ -138,7 +138,17 @@ public class UserController {
         }
     }
 
-
+    @DeleteMapping("/deleteUser/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok().body("{\"message\": \"Пользователь успешно удален\"}");
+        } catch (Exception e) {
+            log.error("Ошибка при удалении пользователя: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при удалении пользователя\"}");
+        }
+    }
 
     private String generatePassword(int length) {
         String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";

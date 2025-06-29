@@ -62,6 +62,36 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @GetMapping(value = "/getCurrentUser", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Пользователь не аутентифицирован");
+        }
+
+        String username;
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+
+        User user = userService.getUserByEmail(username);
+
+        if (user == null) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Не найден пользователь");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+
+        return ResponseEntity.ok(user);
+    }
+
     @GetMapping(value = "/getDTOUser", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> getDTOUser() {

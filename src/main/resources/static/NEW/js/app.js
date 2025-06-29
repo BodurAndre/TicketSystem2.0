@@ -12,6 +12,8 @@ function route() {
         import('/NEW/js/tickets.js').then(module => module.renderClosedTicketsPage());
     } else if (hash === 'loadAllTickets' || hash === '') {
         loadPage('loadAllTickets');
+    } else if (hash === 'MyAccount') {
+        loadPageMyAccount();
     } else {
         loadPage(hash);
     }
@@ -74,14 +76,24 @@ async function loadPageUsers() {
     }
 }
 
+async function loadPageMyAccount() {
+    const containerApp = document.getElementById('app');
+    try {
+        const htmlApp = await fetch(`/NEW/html/MyAccount.html`).then(r => r.text());
+        containerApp.innerHTML = htmlApp;
+        // Импортируем JS-модуль, если потребуется, или инициализируем здесь:
+        if (window.initMyAccount) {
+            window.initMyAccount();
+        }
+    } catch (err) {
+        containerApp.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        console.error(err);
+    }
+}
 
 function setActiveNav() {
     const hash = window.location.hash;
     document.querySelectorAll('.nav-link').forEach(link => {
-        console.log(hash);
-        if (hash === '#createUser') {
-            console.log("зашли в цикл")
-            return}
         link.classList.remove('active');
         if ((hash === '' || hash === '#' || hash === '#loadAllTickets') && link.getAttribute('href') === '#') {
             link.classList.add('active');
@@ -92,9 +104,115 @@ function setActiveNav() {
         if (hash === '#users' && link.getAttribute('href') === '#users') {
             link.classList.add('active');
         }
+        if (hash === '#MyAccount' && link.getAttribute('href') === '#MyAccount') {
+            link.classList.add('active');
+        }
         // Добавь аналогично для других вкладок, если появятся
     });
 }
 
 window.addEventListener('hashchange', setActiveNav);
 window.addEventListener('DOMContentLoaded', setActiveNav);
+
+window.initMyAccount = async function() {
+    const personalBtn = document.getElementById('account-personal-btn');
+    const passwordBtn = document.getElementById('account-password-btn');
+    const content = document.getElementById('account-content');
+
+    function setActive(btn) {
+        document.querySelectorAll('.account-menu-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    personalBtn.onclick = async function() {
+        setActive(personalBtn);
+        content.innerHTML = '<div style="text-align:center;color:#888;">Загрузка...</div>';
+        try {
+            const resp = await fetch('/getCurrentUser');
+            if (!resp.ok) throw new Error('Ошибка загрузки данных');
+            const user = await resp.json();
+            content.innerHTML = `
+                <div style="max-width:600px;margin:0 auto;">
+                    <h2 style="text-align:center;margin-bottom:32px;color:#333;font-weight:600;">Мои данные</h2>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;" class="account-cards-grid">
+                        <div class="account-card">
+                            <div class="account-card-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="account-card-content">
+                                <div class="account-label">Email</div>
+                                <div class="account-value">${user.email || 'Не указан'}</div>
+                            </div>
+                        </div>
+                        <div class="account-card">
+                            <div class="account-card-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="account-card-content">
+                                <div class="account-label">Имя</div>
+                                <div class="account-value">${user.firstName || 'Не указано'}</div>
+                            </div>
+                        </div>
+                        <div class="account-card">
+                            <div class="account-card-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="account-card-content">
+                                <div class="account-label">Фамилия</div>
+                                <div class="account-value">${user.lastName || 'Не указана'}</div>
+                            </div>
+                        </div>
+                        <div class="account-card">
+                            <div class="account-card-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="account-card-content">
+                                <div class="account-label">Роль</div>
+                                <div class="account-value">${user.role || 'Не указана'}</div>
+                            </div>
+                        </div>
+                        <div class="account-card">
+                            <div class="account-card-icon">
+                                <i class="fas fa-venus-mars"></i>
+                            </div>
+                            <div class="account-card-content">
+                                <div class="account-label">Пол</div>
+                                <div class="account-value">${user.gender || 'Не указан'}</div>
+                            </div>
+                        </div>
+                        <div class="account-card">
+                            <div class="account-card-icon">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            <div class="account-card-content">
+                                <div class="account-label">Дата рождения</div>
+                                <div class="account-value">${user.dateOfBirth || 'Не указана'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch (e) {
+            content.innerHTML = '<div style="color:red;text-align:center;">Ошибка загрузки данных</div>';
+        }
+    };
+
+    passwordBtn.onclick = function() {
+        setActive(passwordBtn);
+        content.innerHTML = `
+            <form style="max-width:400px;margin:0 auto;">
+                <div class="account-label">Старый пароль</div>
+                <input type="password" class="account-value" style="width:100%;margin-bottom:16px;" disabled placeholder="Пока недоступно">
+                <div class="account-label">Новый пароль</div>
+                <input type="password" class="account-value" style="width:100%;margin-bottom:16px;" disabled placeholder="Пока недоступно">
+                <div class="account-label">Повторите новый пароль</div>
+                <input type="password" class="account-value" style="width:100%;margin-bottom:24px;" disabled placeholder="Пока недоступно">
+                <button type="button" class="modal-btn" style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);" disabled>Сохранить</button>
+            </form>
+            <div style="color:#888;text-align:center;margin-top:12px;">Изменение пароля будет доступно позже</div>
+        `;
+    };
+
+    // По умолчанию показываем персональные данные
+    personalBtn.click();
+};

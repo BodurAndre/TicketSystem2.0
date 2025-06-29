@@ -1,13 +1,16 @@
 // Делаем функцию closeModal глобально доступной
 window.closeModal = function() {
-    document.getElementById('userModal').classList.remove('active');
+    // Удаляем модальное окно если оно существует
+    const existingModal = document.getElementById('userModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
 
     // Очистка всех полей формы
     document.getElementById('firstName').value = '';
     document.getElementById('lastName').value = '';
     document.getElementById('email').value = '';
     document.getElementById('role').value = '';
-    document.getElementById('country').value = '';
     document.getElementById('dateOfBirth').value = '';
 
     // Снимаем выбор пола (если это radio buttons)
@@ -20,6 +23,59 @@ window.closeModal = function() {
     }, 300);
 };
 
+// Функция для показа модального окна
+function showModal(email, password) {
+    // Удаляем старое модальное окно если оно есть
+    document.getElementById('userModal')?.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'userModal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.3)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '10001';
+    
+    modal.innerHTML = `
+        <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
+            <h3 style="margin-bottom: 18px; color: #27ae60;"><i class='fas fa-user-check'></i> Пользователь успешно создан!</h3>
+            <p style="margin-bottom: 18px; color: #333;">Передайте следующие данные для входа пользователю:</p>
+            <div style="margin-bottom: 24px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block;margin-bottom:4px;color:#666;font-size:0.9em;">Email:</label>
+                    <div style="font-size:1.1em;font-weight:bold;background:#f3f3f3;padding:8px 16px;border-radius:6px;font-family:monospace;">${email}</div>
+                </div>
+                <div>
+                    <label style="display:block;margin-bottom:4px;color:#666;font-size:0.9em;">Пароль:</label>
+                    <div style="font-size:1.1em;font-weight:bold;background:#f3f3f3;padding:8px 16px;border-radius:6px;font-family:monospace;">${password}</div>
+                </div>
+            </div>
+            <button onclick="closeModal()" style="background: linear-gradient(135deg, #27ae60, #16a085); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Понятно</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Добавляем обработчик клика вне модального окна
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            window.closeModal();
+        }
+    });
+    
+    // Добавляем обработчик клавиши Escape
+    document.addEventListener('keydown', function escListener(e) {
+        if (e.key === 'Escape') {
+            window.closeModal();
+            document.removeEventListener('keydown', escListener);
+        }
+    });
+}
 
 // --- Валидация формы ---
 function validateUserForm() {
@@ -43,73 +99,54 @@ function validateUserForm() {
 }
 
 // --- Обработка кнопки создания пользователя ---
-const createUserBtn = document.getElementById('create-user');
-if (createUserBtn) {
-  createUserBtn.onclick = async function() {
-    if (!validateUserForm()) return;
-    const firstName = document.getElementById('firstName').value.trim();
-    const lastName = document.getElementById('lastName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const role = document.getElementById('role').value;
-    const dateOfBirth = document.getElementById('dateOfBirth').value;
-    const gender = document.querySelector('input[name="gender"]:checked');
+function initCreateUser() {
+    const createUserBtn = document.getElementById('create-user');
+    if (createUserBtn) {
+      createUserBtn.onclick = async function() {
+        if (!validateUserForm()) return;
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const role = document.getElementById('role').value;
+        const dateOfBirth = document.getElementById('dateOfBirth').value;
+        const gender = document.querySelector('input[name="gender"]:checked');
 
-    const data = {
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        role: role,
-        dateOfBirth: dateOfBirth,
-        gender: gender.value
-    };
+        const data = {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            role: role,
+            dateOfBirth: dateOfBirth,
+            gender: gender.value
+        };
 
-    try {
-        const csrf = await getCsrfToken();
-        $.ajax({
-            url: "/createUser",
-            method: "POST",
-            dataType: "json",
-            contentType: "application/json",
-            data: JSON.stringify(data),
-            headers: { [csrf.headerName]: csrf.token },
-            xhrFields: { withCredentials: true },
-            success: function (data) {
-                console.log("Request close:", data);
-                showNotification("Пользователь успешно создан!", 'success');
-                showModal(data.email, data.password); // вызов модалки
-            },
-            error: function (error) {
-                console.error("Error:", error);
-                const message = error.responseJSON?.message || "Неизвестная ошибка";
-                showNotification(message, 'error');
-            }
-        });
-    } catch (error) {
-        console.error("Error:", error);
-        showNotification("Ошибка", 'error');
+        try {
+            const csrf = await getCsrfToken();
+            $.ajax({
+                url: "/createUser",
+                method: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                headers: { [csrf.headerName]: csrf.token },
+                xhrFields: { withCredentials: true },
+                success: function (data) {
+                    console.log("Request close:", data);
+                    showNotification("Пользователь успешно создан!", 'success');
+                    showModal(data.email, data.password); // вызов модалки
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    const message = error.responseJSON?.message || "Неизвестная ошибка";
+                    showNotification(message, 'error');
+                }
+            });
+        } catch (error) {
+            console.error("Error:", error);
+            showNotification("Ошибка", 'error');
+        }
+      }
     }
-  }
-}
-
-function showModal(email, password) {
-    document.getElementById('modal-email').textContent = email;
-    document.getElementById('modal-password').textContent = password;
-    document.getElementById('userModal').classList.add('active');
-    
-    // Добавляем обработчик клика вне модального окна
-    document.getElementById('userModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            window.closeModal();
-        }
-    });
-    
-    // Добавляем обработчик клавиши Escape
-    document.addEventListener('keydown', function escListener(e) {
-        if (e.key === 'Escape') {
-            window.closeModal();
-            document.removeEventListener('keydown', escListener);
-        }
-    });
 }
 
 async function getCsrfToken() {
@@ -123,4 +160,9 @@ async function getCsrfToken() {
             console.error("Error fetching CSRF token");
             throw new Error("CSRF token error");
         });
+}
+
+// Экспортируем функцию init
+export function init() {
+    initCreateUser();
 }

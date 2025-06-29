@@ -5,6 +5,10 @@ function route() {
     const hash = window.location.hash.slice(1) || 'loadAllTickets';
     if (hash === 'users') {
         loadPageUsers();
+    } else if (hash === 'createUser') {
+        loadPageCreateUser();
+    } else if (hash === 'createTickets') {
+        loadPage('createTickets');
     } else if (hash.startsWith('request-id')) {
         const id = hash.replace('request-id', '');
         loadPage('editRequest', id);
@@ -19,6 +23,24 @@ function route() {
     }
 }
 
+// Функция для загрузки CSS файла
+async function loadCSS(cssPath) {
+    return new Promise((resolve, reject) => {
+        // Проверяем, не загружен ли уже этот CSS
+        const existingLink = document.querySelector(`link[href="${cssPath}"]`);
+        if (existingLink) {
+            resolve();
+            return;
+        }
+
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = cssPath;
+        link.onload = () => resolve();
+        link.onerror = () => reject(new Error(`Failed to load CSS: ${cssPath}`));
+        document.head.appendChild(link);
+    });
+}
 
 async function loadPage(pageName, id = null) {
     const containerApp = document.getElementById('app');
@@ -32,6 +54,9 @@ async function loadPage(pageName, id = null) {
         if (containerInformation) {
             containerInformation.innerHTML = htmlInfo;
         }
+
+        // Загружаем CSS файл для страницы
+        await loadCSS(`/NEW/css/${pageName}.css`);
 
         const scriptModule = await import(`/NEW/js/${pageName}.js?${Date.now()}`);
         if (scriptModule.init) {
@@ -61,6 +86,9 @@ async function loadPageUsers() {
             containerInformation.innerHTML = htmlInfo;
         }
 
+        // Загружаем CSS файл
+        await loadCSS('/NEW/css/loadAllUsers.css');
+
         // Импортируем JS-модуль и вызываем init
         const scriptModule = await import(`/NEW/js/loadAllUsers.js?${Date.now()}`);
         if (scriptModule.init) {
@@ -81,12 +109,49 @@ async function loadPageMyAccount() {
     try {
         const htmlApp = await fetch(`/NEW/html/MyAccount.html`).then(r => r.text());
         containerApp.innerHTML = htmlApp;
+        
+        // Загружаем CSS файл
+        await loadCSS('/NEW/css/MyAccount.css');
+        
         // Импортируем JS-модуль, если потребуется, или инициализируем здесь:
         if (window.initMyAccount) {
             window.initMyAccount();
         }
     } catch (err) {
         containerApp.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        console.error(err);
+    }
+}
+
+async function loadPageCreateUser() {
+    const containerApp = document.getElementById('app');
+    const containerInformation = document.getElementById('information');
+
+    try {
+        // Загружаем HTML-шаблон
+        const htmlApp = await fetch(`/NEW/html/createUser.html`).then(r => r.text());
+        const htmlInfo = await fetch(`/NEW/html/userInformation.html`).then(r => r.text());
+
+        // Вставляем их в соответствующие контейнеры
+        containerApp.innerHTML = htmlApp;
+        if (containerInformation) {
+            containerInformation.innerHTML = htmlInfo;
+        }
+
+        // Загружаем CSS файл
+        await loadCSS('/NEW/css/createUser.css');
+
+        // Импортируем JS-модуль и вызываем init
+        const scriptModule = await import(`/NEW/js/createUser.js?${Date.now()}`);
+        if (scriptModule.init) {
+            scriptModule.init();
+        }
+
+    } catch (err) {
+        containerApp.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        if (containerInformation) {
+            containerInformation.innerHTML = `<h2>Ошибка загрузки информации</h2>`;
+        }
         console.error(err);
     }
 }
@@ -99,6 +164,9 @@ function setActiveNav() {
             link.classList.add('active');
         }
         if (hash === '#createTickets' && link.getAttribute('href') === '#createTickets') {
+            link.classList.add('active');
+        }
+        if (hash === '#createUser' && link.getAttribute('href') === '#createUser') {
             link.classList.add('active');
         }
         if (hash === '#users' && link.getAttribute('href') === '#users') {

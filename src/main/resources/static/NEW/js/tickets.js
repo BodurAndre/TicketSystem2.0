@@ -47,21 +47,23 @@ export async function renderTicketsPage() {
             </div>
         </div>
         <div class="table-wrapper">
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th class="request" data-sort="id"><i class="fas fa-hashtag"></i> ID <span class="sort-arrow" id="sort-id"></span></th>
-                        <th class="date" data-sort="data"><i class="fas fa-calendar"></i> Дата <span class="sort-arrow" id="sort-data"></span></th>
-                        <th class="time" data-sort="time"><i class="fas fa-clock"></i> Время <span class="sort-arrow" id="sort-time"></span></th>
-                        <th class="tema" data-sort="tema"><i class="fas fa-tag"></i> Тема <span class="sort-arrow" id="sort-tema"></span></th>
-                        <th class="priority" data-sort="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет <span class="sort-arrow" id="sort-priority"></span></th>
-                        <th class="from" data-sort="from"><i class="fas fa-user"></i> От <span class="sort-arrow" id="sort-from"></span></th>
-                        <th class="status" data-sort="status"><i class="fas fa-info-circle"></i> Статус <span class="sort-arrow" id="sort-status"></span></th>
-                        <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
-                    </tr>
-                </thead>
-                <tbody id="tickets-tbody"></tbody>
-            </table>
+            <div class="table-scroll-container">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th class="request" data-sort="id"><i class="fas fa-hashtag"></i> ID <span class="sort-arrow" id="sort-id"></span></th>
+                            <th class="date" data-sort="data"><i class="fas fa-calendar"></i> Дата <span class="sort-arrow" id="sort-data"></span></th>
+                            <th class="time" data-sort="time"><i class="fas fa-clock"></i> Время <span class="sort-arrow" id="sort-time"></span></th>
+                            <th class="tema" data-sort="tema"><i class="fas fa-tag"></i> Тема <span class="sort-arrow" id="sort-tema"></span></th>
+                            <th class="priority" data-sort="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет <span class="sort-arrow" id="sort-priority"></span></th>
+                            <th class="from" data-sort="from"><i class="fas fa-user"></i> От <span class="sort-arrow" id="sort-from"></span></th>
+                            <th class="status" data-sort="status"><i class="fas fa-info-circle"></i> Статус <span class="sort-arrow" id="sort-status"></span></th>
+                            <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tickets-tbody"></tbody>
+                </table>
+            </div>
         </div>
     `;
     document.getElementById('refresh-tickets-btn').onclick = loadTickets;
@@ -569,21 +571,23 @@ export async function renderClosedTicketsPage() {
             </div>
         </div>
         <div class="table-wrapper">
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th class="request"><i class="fas fa-hashtag"></i> ID</th>
-                        <th class="date"><i class="fas fa-calendar"></i> Дата</th>
-                        <th class="time"><i class="fas fa-clock"></i> Время</th>
-                        <th class="tema"><i class="fas fa-tag"></i> Тема</th>
-                        <th class="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет</th>
-                        <th class="from"><i class="fas fa-user"></i> От</th>
-                        <th class="status"><i class="fas fa-info-circle"></i> Статус</th>
-                        <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
-                    </tr>
-                </thead>
-                <tbody id="closed-tickets-tbody"></tbody>
-            </table>
+            <div class="table-scroll-container">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th class="request"><i class="fas fa-hashtag"></i> ID</th>
+                            <th class="date"><i class="fas fa-calendar"></i> Дата</th>
+                            <th class="time"><i class="fas fa-clock"></i> Время</th>
+                            <th class="tema"><i class="fas fa-tag"></i> Тема</th>
+                            <th class="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет</th>
+                            <th class="from"><i class="fas fa-user"></i> От</th>
+                            <th class="status"><i class="fas fa-info-circle"></i> Статус</th>
+                            <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="closed-tickets-tbody"></tbody>
+                </table>
+            </div>
         </div>
     `;
     document.getElementById('refresh-closed-tickets-btn').onclick = loadClosedTickets;

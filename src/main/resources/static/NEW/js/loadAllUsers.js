@@ -117,9 +117,7 @@ function renderFilteredUsers() {
         editBtn.className = 'action-btn edit';
         editBtn.title = 'Редактировать';
         editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-        editBtn.addEventListener('click', function () {
-            window.location.href = '/editUser/' + user.id;
-        });
+        editBtn.onclick = () => window.showEditUserModal(user);
         actionDiv.appendChild(editBtn);
         
         let deleteBtn = document.createElement('button');
@@ -203,4 +201,185 @@ async function getCsrfToken() {
             console.error("Error fetching CSRF token");
             throw new Error("CSRF token error");
         });
+}
+
+window.showEditUserModal = function(user) {
+    document.getElementById('edit-user-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'edit-user-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.3)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '10001';
+    modal.innerHTML = `
+        <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
+            <h3 style="margin-bottom: 18px; color: #3498db;"><i class='fas fa-user-edit'></i> Редактировать пользователя</h3>
+            <form id="edit-user-form">
+                <input type="hidden" name="userId" value="${user.id}">
+                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input name="firstName" value="${user.firstName || ''}" placeholder="Имя" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid #ccc;">
+                    <input name="lastName" value="${user.lastName || ''}" placeholder="Фамилия" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid #ccc;">
+                </div>
+                <input name="email" value="${user.email || ''}" placeholder="Email" style="width:100%;margin-bottom:10px;padding:8px 12px;border-radius:6px;border:1px solid #ccc;">
+                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                    <select name="role" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid #ccc;">
+                        <option value="ADMIN" ${user.role==='ADMIN'?'selected':''}>ADMIN</option>
+                        <option value="USER" ${user.role==='USER'?'selected':''}>USER</option>
+                        <option value="PROCESSOR" ${user.role==='PROCESSOR'?'selected':''}>PROCESSOR</option>
+                    </select>
+                    <select name="gender" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid #ccc;">
+                        <option value="MALE" ${user.gender==='MALE'?'selected':''}>Мужской</option>
+                        <option value="FEMALE" ${user.gender==='FEMALE'?'selected':''}>Женский</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input name="dateOfBirth" value="${user.dateOfBirth || ''}" placeholder="Дата рождения" type="date" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid #ccc;">
+                </div>
+                <div style="display:flex;gap:18px;justify-content:center;margin-top:18px;">
+                    <button type="submit" style="background: linear-gradient(135deg, #27ae60, #16a085); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Сохранить</button>
+                    <button type="button" id="edit-user-cancel" style="background: #f3f3f3; color: #333; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Отмена</button>
+                </div>
+                <div style="margin-top:24px;">
+                    <button type="button" id="reset-user-password" style="background: linear-gradient(135deg, #e67e22, #e74c3c); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Сбросить пароль</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('edit-user-cancel').onclick = () => modal.remove();
+    document.getElementById('edit-user-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            userId: form.userId.value,
+            firstName: form.firstName.value.trim(),
+            lastName: form.lastName.value.trim(),
+            email: form.email.value.trim(),
+            role: form.role.value,
+            dateOfBirth: form.dateOfBirth.value,
+            gender: form.gender.value
+        };
+        try {
+            const csrf = await getCsrfToken();
+            $.ajax({
+                url: '/updateUser',
+                method: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                headers: { [csrf.headerName]: csrf.token },
+                xhrFields: { withCredentials: true },
+                success: function (resp) {
+                    showNotification("Данные пользователя обновлены", true);
+                    modal.remove();
+                    refreshTable();
+                },
+                error: function (error) {
+                    showNotification("Ошибка при обновлении: " + (error.responseJSON?.message || error.status), false);
+                }
+            });
+        } catch (error) {
+            showNotification('Ошибка при обновлении пользователя', 'error');
+        }
+    };
+    document.getElementById('reset-user-password').onclick = function() {
+        showResetPasswordConfirm(user, modal);
+    };
+};
+
+window.showResetPasswordModal = function(email, password) {
+    document.getElementById('reset-password-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'reset-password-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.3)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '10001';
+    modal.innerHTML = `
+        <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
+            <h3 style="margin-bottom: 18px; color: #27ae60;"><i class='fas fa-key'></i> Пароль сброшен</h3>
+            <p style="margin-bottom: 18px; color: #333;">Новый пароль для <b>${email}</b>:</p>
+            <div style="font-size:1.2em;font-weight:bold;background:#f3f3f3;padding:12px 24px;border-radius:8px;margin-bottom:24px;">${password}</div>
+            <button id="reset-password-ok" style="background: linear-gradient(135deg, #27ae60, #16a085); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Ок</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('reset-password-ok').onclick = () => modal.remove();
+};
+
+function showResetPasswordConfirm(user, parentModal) {
+    document.getElementById('reset-password-confirm-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'reset-password-confirm-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.3)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '10001';
+    modal.innerHTML = `
+        <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
+            <h3 style="margin-bottom: 18px; color: #e67e22;"><i class='fas fa-key'></i> Сбросить пароль?</h3>
+            <p style="margin-bottom: 24px; color: #333;">Вы уверены, что хотите сбросить пароль для <b>${user.email}</b>?</p>
+            <div style="display: flex; gap: 18px; justify-content: center;">
+                <button id="reset-password-confirm" style="background: linear-gradient(135deg, #e67e22, #e74c3c); color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Да, сбросить</button>
+                <button id="reset-password-cancel" style="background: #f3f3f3; color: #333; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer;">Нет</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('reset-password-cancel').onclick = () => modal.remove();
+    document.getElementById('reset-password-confirm').onclick = async () => {
+        modal.remove();
+        parentModal.remove();
+        await resetUserPassword(user);
+    };
+}
+
+async function resetUserPassword(user) {
+    try {
+        const csrf = await getCsrfToken();
+        console.log('[resetUserPassword] email:', user.email);
+        $.ajax({
+            url: '/resetPasswordUser?id=' + user.id,
+            method: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(user.email),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function (resp) {
+                console.log('[resetUserPassword] response:', resp);
+                if (resp && resp.password) {
+                    window.showResetPasswordModal(user.email, resp.password);
+                } else {
+                    showNotification("Пароль сброшен, но не получен новый пароль", true);
+                }
+                refreshTable();
+            },
+            error: function (error) {
+                console.error('[resetUserPassword] error:', error);
+                showNotification("Ошибка при сбросе пароля: " + (error.responseJSON?.message || error.status), false);
+            }
+        });
+    } catch (error) {
+        console.error('[resetUserPassword] exception:', error);
+        showNotification('Ошибка при сбросе пароля', 'error');
+    }
 }

@@ -1,5 +1,6 @@
 package org.example.server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.server.DTO.UserCreateDTO;
 import org.example.server.DTO.UserUpdateDTO;
 import org.example.server.models.Request;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -86,4 +88,11 @@ public class UserService {
         User user = getUser(id);
         userRepository.delete(user);
     }
+
+    public void resetPasswordUser(Long id, String generatedPassword) {
+        User user = getUser(id);
+        user.setPassword(passwordEncoder.encode(generatedPassword));
+        userRepository.save(user);
+    }
+
 }

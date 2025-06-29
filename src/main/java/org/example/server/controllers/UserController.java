@@ -138,6 +138,35 @@ public class UserController {
         }
     }
 
+    @PostMapping("/resetPasswordUser")
+    public ResponseEntity<?> resetPasswordUser(@RequestBody String email,
+                                               @RequestParam Long id) {
+        try {
+            log.warn("Email - " + email);
+            log.warn("id - " + id);
+            String generatedPassword = generatePassword(8);
+
+            userService.resetPasswordUser(id, generatedPassword);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Пароль успешно сброшен");
+            response.put("email", email);
+            response.put("password", generatedPassword);
+            log.warn("Password - " + generatedPassword);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("Ошибка при создании пользователя: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Collections.singletonMap("message", e.getMessage()));
+
+        } catch (Exception e) {
+            log.error("Internal server error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Ошибка при создании пользователя"));
+        }
+    }
+
     @DeleteMapping("/deleteUser/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable long id) {
         try {

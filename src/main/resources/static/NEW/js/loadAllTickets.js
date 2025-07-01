@@ -37,7 +37,7 @@ export function init() {
     }, 100);
 }
 
-export function refreshTable() {
+export async function refreshTable() {
     $.ajax({
         url: '/requests',
         method: 'GET',

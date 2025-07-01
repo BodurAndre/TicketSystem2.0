@@ -62,19 +62,6 @@
     flex: 1;
 }
 
-.stat-number {
-    font-size: 2.5em;
-    font-weight: 700;
-    color: #333;
-    line-height: 1;
-    margin-bottom: 8px;
-}
-
-.stat-label {
-    color: #666;
-    font-size: 1em;
-    font-weight: 500;
-}
 
 .statistics-charts {
     display: grid;

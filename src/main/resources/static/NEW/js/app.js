@@ -28,7 +28,10 @@ function route() {
 // Функция для загрузки CSS файла
 async function loadCSS(cssPath) {
     return new Promise((resolve, reject) => {
-        // Проверяем, не загружен ли уже этот CSS
+        // Удаляем все ранее подключённые page-specific CSS
+        document.querySelectorAll('link[data-page-css]').forEach(link => link.remove());
+
+        // Проверяем, не загружен ли уже этот CSS (на случай быстрой навигации)
         const existingLink = document.querySelector(`link[href="${cssPath}"]`);
         if (existingLink) {
             resolve();
@@ -38,6 +41,7 @@ async function loadCSS(cssPath) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = cssPath;
+        link.setAttribute('data-page-css', 'true');
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load CSS: ${cssPath}`));
         document.head.appendChild(link);

@@ -44,6 +44,15 @@ export function refreshTable() {
                 cellTema.textContent = request.tema;
                 row.appendChild(cellTema);
 
+                // Компания
+                let cellCompany = document.createElement('td');
+                if(request.company != null) {
+                    cellCompany.textContent = request.company.name;
+                } else {
+                    cellCompany.textContent = "Не указана";
+                }
+                row.appendChild(cellCompany);
+
                 // Приоритет
                 let cellPriority = document.createElement('td');
                 cellPriority.textContent = request.priority;
@@ -117,14 +126,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         rows.forEach(row => {
             const temaCell = row.querySelector("td:nth-child(4)"); // 4-й столбец — "Тема"
-            const userCell = row.querySelector("td:nth-child(6)"); // 6-й столбец — "От"
+            const companyCell = row.querySelector("td:nth-child(5)"); // 5-й столбец — "Компания"
+            const userCell = row.querySelector("td:nth-child(7)"); // 7-й столбец — "От" (сдвинулся из-за новой колонки)
 
-            if (temaCell && userCell) {
+            if (temaCell && companyCell && userCell) {
                 const temaText = temaCell.textContent.toLowerCase();
+                const companyText = companyCell.textContent.toLowerCase();
                 const userText = userCell.textContent.toLowerCase();
 
                 // Показываем строку, если хотя бы одно поле содержит фильтр
-                row.style.display = temaText.includes(filter) || userText.includes(filter) ? "" : "none";
+                row.style.display = temaText.includes(filter) || companyText.includes(filter) || userText.includes(filter) ? "" : "none";
             }
         });
     });

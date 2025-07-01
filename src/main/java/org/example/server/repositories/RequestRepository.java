@@ -13,8 +13,6 @@ public interface RequestRepository extends JpaRepository<Request,Long> {
     Optional<Request> findById(Long id);
     List<Request> findByStatus(String status);
     List<Request> findByStatusAndCreateUser_Email(String status, String email);
-    List<Request> findByStatusAndAssigneeUser_Email(String status, String email);
     List<Request> findByCreateUser_Email(String email);
-    List<Request> findByAssigneeUser_Email(String email);
 
 }

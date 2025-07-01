@@ -28,8 +28,15 @@ public class Request {
     private String tema;
 
     @ManyToOne
-    @JoinColumn(name = "assignee_user_id") // внешний ключ в таблице tikets
-    private User assigneeUser;
+    @JoinColumn(name = "company_id") // внешний ключ в таблице tikets
+    private Company company;
+
+    @ManyToOne
+    @JoinColumn(name = "server_id") // внешний ключ для сервера
+    private Server server;
+
+    @Column(name = "contacts")
+    private String contacts;
 
     @ManyToOne
     @JoinColumn(name = "create_user_id") // внешний ключ в таблице tikets

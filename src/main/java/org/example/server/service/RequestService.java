@@ -34,10 +34,6 @@ public class RequestService {
         List<Request> requests = requestRepository.findByCreateUser_Email(email);
         return requests.isEmpty() ? new ArrayList<>() : requests;
     }
-    public List<Request> getRequestsByAssigneeEmail(String email) {
-        List<Request> requests = requestRepository.findByAssigneeUser_Email(email);
-        return requests.isEmpty() ? new ArrayList<>() : requests;
-    }
 
     /*NEW VERSION*/
 
@@ -91,15 +87,6 @@ public class RequestService {
 
     public List<Request> getOpenRequestsByCreatorEmail(String email) {
         List<Request> requests = requestRepository.findByStatusAndCreateUser_Email("OPEN", email);
-        return requests.isEmpty() ? new ArrayList<>() : requests;
-    }
-    public List<Request> getOpenRequestsByAssigneeEmail(String email) {
-        List<Request> requests = requestRepository.findByStatusAndAssigneeUser_Email("OPEN", email);
-        return requests.isEmpty() ? new ArrayList<>() : requests;
-    }
-
-    public List<Request> getCloseRequestsByAssigneeEmail(String email) {
-        List<Request> requests = requestRepository.findByStatusAndAssigneeUser_Email("CLOSED", email);
         return requests.isEmpty() ? new ArrayList<>() : requests;
     }
 

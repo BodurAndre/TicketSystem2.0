@@ -18,6 +18,8 @@ function route() {
         loadPage('loadAllTickets');
     } else if (hash === 'MyAccount') {
         loadPageMyAccount();
+    } else if (hash === 'statistics') {
+        loadPageStatistics();
     } else {
         loadPage(hash);
     }
@@ -156,6 +158,26 @@ async function loadPageCreateUser() {
     }
 }
 
+async function loadPageStatistics() {
+    const containerApp = document.getElementById('app');
+    try {
+        const htmlApp = await fetch(`/NEW/html/statistics.html`).then(r => r.text());
+        containerApp.innerHTML = htmlApp;
+        
+        // Загружаем CSS файл
+        await loadCSS('/NEW/css/statistics.css');
+        
+        // Загружаем JavaScript файл
+        const scriptModule = await import(`/NEW/js/statistics.js?${Date.now()}`);
+        if (scriptModule.init) {
+            scriptModule.init();
+        }
+    } catch (err) {
+        containerApp.innerHTML = `<h2>Ошибка загрузки страницы статистики</h2>`;
+        console.error(err);
+    }
+}
+
 function setActiveNav() {
     const hash = window.location.hash;
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -173,6 +195,9 @@ function setActiveNav() {
             link.classList.add('active');
         }
         if (hash === '#MyAccount' && link.getAttribute('href') === '#MyAccount') {
+            link.classList.add('active');
+        }
+        if (hash === '#statistics' && link.getAttribute('href') === '#statistics') {
             link.classList.add('active');
         }
         // Добавь аналогично для других вкладок, если появятся

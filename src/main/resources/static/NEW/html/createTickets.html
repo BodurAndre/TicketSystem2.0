@@ -17,12 +17,24 @@
                     </select>
                 </div>
             </div>
-            <div class="input-group user-menu">
+            <div class="input-group">
                 <div class="input-item">
-                    <label for="select-user">Пользователь:</label>
-                    <select id="select-user" name="userId" required>
-                        <option value="" disabled selected>Выберите пользователя</option>
+                    <label for="select-company">Компания:</label>
+                    <select id="select-company" name="companyId" required>
+                        <option value="" disabled selected>Выберите компанию</option>
                     </select>
+                </div>
+                <div class="input-item">
+                    <label for="select-server">Сервер:</label>
+                    <select id="select-server" name="serverId" required>
+                        <option value="" disabled selected>Сначала выберите компанию</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <div class="input-item">
+                    <label for="contacts">Контакты:</label>
+                    <input type="text" id="contacts" name="contacts" placeholder="Введите контакты" required>
                 </div>
             </div>
             <label for="description">Описание:</label>

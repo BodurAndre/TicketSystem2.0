@@ -12,6 +12,11 @@
     padding: 30px;
     width: 100%;
     max-width: none;
+    margin: 0;
+}
+
+.form form {
+    width: 100%;
 }
 
 .form h2 {

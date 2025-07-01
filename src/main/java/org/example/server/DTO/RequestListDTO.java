@@ -8,7 +8,9 @@ public class RequestListDTO {
     private String data;
     private String time;
     private String tema;
-    private UserListDTO assigneeUser;
+    private CompanyListDTO company;
+    private ServerListDTO server;
+    private String contacts;
     private UserListDTO createUser;
     private String status;
     private String priority;
@@ -19,5 +21,17 @@ public class RequestListDTO {
         private String email;
         private String firstName;
         private String lastName;
+    }
+
+    @Data
+    public static class CompanyListDTO {
+        private Long id;
+        private String name;
+    }
+
+    @Data
+    public static class ServerListDTO {
+        private Long id;
+        private String name;
     }
 }

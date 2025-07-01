@@ -1,179 +1,241 @@
 // loadAllTickets.js — точка входа для главной страницы тикетов
 
-export async function init() {
-    // Импортируем функцию из tickets.js
-    const { renderTicketsPage, updateTicketStats } = await import('./tickets.js');
-    
-    // Рендерим страницу тикетов
-    await renderTicketsPage();
-    
-    // Обновляем статистику после полной загрузки
-    await updateTicketStats();
+let allTickets = [];
+let ticketSort = { field: null, asc: true };
+let ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL' };
+
+export function init() {
+    refreshTable();
+    // Навешиваем обработчики после загрузки таблицы
+    setTimeout(() => {
+        // Используем глобальный поиск
+        const globalSearch = document.querySelector('input[name="title"]');
+        if (globalSearch) globalSearch.oninput = (e) => { ticketFilters.search = e.target.value; renderFilteredTickets(); };
+        
+        const status = document.getElementById('filter-status');
+        if (status) status.onchange = (e) => { ticketFilters.status = e.target.value; renderFilteredTickets(); };
+        
+        const priority = document.getElementById('filter-priority');
+        if (priority) priority.onchange = (e) => { ticketFilters.priority = e.target.value; renderFilteredTickets(); };
+        
+        const date = document.getElementById('filter-date');
+        if (date) date.onchange = (e) => { ticketFilters.date = e.target.value; renderFilteredTickets(); };
+        
+        document.querySelectorAll('.modern-table th[data-sort]').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.onclick = () => {
+                const field = th.getAttribute('data-sort');
+                if (ticketSort.field === field) {
+                    ticketSort.asc = !ticketSort.asc;
+                } else {
+                    ticketSort.field = field;
+                    ticketSort.asc = true;
+                }
+                renderFilteredTickets();
+            };
+        });
+    }, 100);
 }
 
 export function refreshTable() {
     $.ajax({
-        url: '/requests', // Путь к серверу
+        url: '/requests',
         method: 'GET',
         success: function(data) {
-            let tableBody = document.querySelector("table tbody");
-            tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых строк
-            console.log(data);
-
-            // Перебираем все запросы и добавляем их в таблицу
-            data.forEach(function(request) {
-                let row = document.createElement('tr');
-
-                // ID
-                let cellId = document.createElement('td');
-                cellId.textContent = request.id;
-                row.appendChild(cellId);
-
-                // Дата
-                let cellData = document.createElement('td');
-                cellData.textContent = request.data; // Обратите внимание на правильное имя поля
-                row.appendChild(cellData);  // Добавляем сюда cellData
-
-                // Время
-                let cellTime = document.createElement('td');
-                cellTime.textContent = request.time; // Обратите внимание на правильное имя поля
-                row.appendChild(cellTime);  // Добавляем сюда cellTime
-
-                // Тема
-                let cellTema = document.createElement('td');
-                cellTema.textContent = request.tema;
-                row.appendChild(cellTema);
-
-                // Компания
-                let cellCompany = document.createElement('td');
-                if(request.company != null) {
-                    cellCompany.textContent = request.company.name;
-                } else {
-                    cellCompany.textContent = "Не указана";
-                }
-                row.appendChild(cellCompany);
-
-                // Приоритет
-                let cellPriority = document.createElement('td');
-                cellPriority.textContent = request.priority;
-                row.appendChild(cellPriority);
-
-                // Пользователь
-                let cellUser = document.createElement('td');
-                if(request.createUser != null) {
-                    const user = request.createUser; // Предполагаем, что request.user — это объект User
-                    // Формируем строку в формате "firstName lastName (email)"
-                    const userText = `${user.firstName} ${user.lastName} (${user.email})`;
-                    cellUser.textContent = userText;
-                }
-                else {
-                    const defaultText = "Пользователь не выбран";
-                    cellUser.textContent = defaultText; // <-- правильно!
-                }
-                row.appendChild(cellUser);
-                // Статус
-                let cellStatus = document.createElement('td');
-                cellStatus.textContent = request.status;
-                row.appendChild(cellStatus);
-
-                // Действие (редактировать/закрытие)
-                let cellAction = document.createElement('td');
-                cellAction.className = 'edit';
-                let actionDiv = document.createElement('div');
-                actionDiv.className = 'action-buttons';
-
-                // Кнопка редактировать
-                let editBtn = document.createElement('button');
-                editBtn.className = 'action-btn edit';
-                editBtn.title = 'Редактировать';
-                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-                editBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    window.location.href = '#request-id' + request.id;
-                });
-                actionDiv.appendChild(editBtn);
-
-                // Кнопка Закрытие
-                let deleteBtn = document.createElement('button');
-                deleteBtn.className = 'action-btn delete';
-                deleteBtn.title = 'Закрыть';
-                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-                deleteBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    showDeleteModal(request.id);
-                });
-                actionDiv.appendChild(deleteBtn);
-
-                cellAction.appendChild(actionDiv);
-                row.appendChild(cellAction);
-
-                // Добавляем строку в таблицу
-                tableBody.appendChild(row);
-            });
+            allTickets = data;
+            renderFilteredTickets();
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error("Ошибка при загрузке данных: ", error);
         }
     });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const searchInput = document.querySelector("input[name='title']");
-
-    searchInput.addEventListener("input", function () {
-        const filter = searchInput.value.trim().toLowerCase();
-        const rows = document.querySelectorAll("table tbody tr");
-
-        rows.forEach(row => {
-            const temaCell = row.querySelector("td:nth-child(4)"); // 4-й столбец — "Тема"
-            const companyCell = row.querySelector("td:nth-child(5)"); // 5-й столбец — "Компания"
-            const userCell = row.querySelector("td:nth-child(7)"); // 7-й столбец — "От" (сдвинулся из-за новой колонки)
-
-            if (temaCell && companyCell && userCell) {
-                const temaText = temaCell.textContent.toLowerCase();
-                const companyText = companyCell.textContent.toLowerCase();
-                const userText = userCell.textContent.toLowerCase();
-
-                // Показываем строку, если хотя бы одно поле содержит фильтр
-                row.style.display = temaText.includes(filter) || companyText.includes(filter) || userText.includes(filter) ? "" : "none";
+function renderFilteredTickets() {
+    let filtered = allTickets.filter(ticket => {
+        const search = ticketFilters.search.trim().toLowerCase();
+        let match = true;
+        if (search) {
+            match = (
+                (ticket.tema && ticket.tema.toLowerCase().includes(search)) ||
+                (ticket.description && ticket.description.toLowerCase().includes(search)) ||
+                (ticket.createUser && ((ticket.createUser.firstName + ' ' + ticket.createUser.lastName).toLowerCase().includes(search)))
+            );
+        }
+        if (ticketFilters.status !== 'ALL' && String(ticket.status).toUpperCase() !== ticketFilters.status) return false;
+        if (ticketFilters.priority !== 'ALL' && String(ticket.priority).toUpperCase() !== ticketFilters.priority) return false;
+        if (ticketFilters.date !== 'ALL' && !isDateMatch(ticket.data)) return false;
+        return match;
+    });
+    
+    // Сортировка
+    if (ticketSort.field) {
+        filtered.sort((a, b) => {
+            let v1 = a[ticketSort.field];
+            let v2 = b[ticketSort.field];
+            if (ticketSort.field === 'from') {
+                v1 = a.createUser ? (a.createUser.firstName + ' ' + a.createUser.lastName) : '';
+                v2 = b.createUser ? (b.createUser.firstName + ' ' + b.createUser.lastName) : '';
             }
+            if (typeof v1 === 'string') v1 = v1.toLowerCase();
+            if (typeof v2 === 'string') v2 = v2.toLowerCase();
+            if (v1 < v2) return ticketSort.asc ? -1 : 1;
+            if (v1 > v2) return ticketSort.asc ? 1 : -1;
+            return 0;
         });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const table = document.querySelector("table");
-    const headers = table.querySelectorAll("th");
-    let sortOrder = {}; // Объект для хранения направления сортировки
-
-    headers.forEach((header, columnIndex) => {
-        header.style.cursor = "pointer"; // Делаем курсор указателем для удобства
-        header.addEventListener("click", function () {
-            const tbody = table.querySelector("tbody");
-            const rows = Array.from(tbody.querySelectorAll("tr"));
-
-            // Определяем текущий порядок сортировки (по возрастанию или убыванию)
-            sortOrder[columnIndex] = !sortOrder[columnIndex];
-
-            rows.sort((rowA, rowB) => {
-                const cellA = rowA.children[columnIndex].textContent.trim();
-                const cellB = rowB.children[columnIndex].textContent.trim();
-
-                // Проверяем, числовые ли данные (для правильной сортировки чисел)
-                const isNumeric = !isNaN(cellA) && !isNaN(cellB);
-                if (isNumeric) {
-                    return sortOrder[columnIndex] ? cellA - cellB : cellB - cellA;
-                }
-
-                return sortOrder[columnIndex] ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-            });
-
-            // Обновляем таблицу с отсортированными строками
-            tbody.innerHTML = "";
-            rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // Стилизация стрелок сортировки
+    document.querySelectorAll('.sort-arrow').forEach(el => el.innerHTML = '');
+    if (ticketSort.field) {
+        const arrow = document.getElementById('sort-' + ticketSort.field);
+        if (arrow) {
+            arrow.innerHTML = ticketSort.asc ? '<i class="fas fa-chevron-up" style="color:#3498db;font-size:0.9em;"></i>' : '<i class="fas fa-chevron-down" style="color:#3498db;font-size:0.9em;"></i>';
+        }
+    }
+    
+    let tableBody = document.querySelector("#ticketsTable tbody");
+    tableBody.innerHTML = '';
+    
+    filtered.forEach(function(ticket) {
+        let row = document.createElement('tr');
+        
+        let cellId = document.createElement('td');
+        cellId.textContent = ticket.id;
+        row.appendChild(cellId);
+        
+        let cellData = document.createElement('td');
+        cellData.textContent = formatDate(ticket.data);
+        row.appendChild(cellData);
+        
+        let cellTime = document.createElement('td');
+        cellTime.textContent = formatTime(ticket.time);
+        row.appendChild(cellTime);
+        
+        let cellTema = document.createElement('td');
+        cellTema.textContent = ticket.tema;
+        row.appendChild(cellTema);
+        
+        let cellCompany = document.createElement('td');
+        if(ticket.company != null) {
+            cellCompany.textContent = ticket.company.name;
+        } else {
+            cellCompany.textContent = "Не указана";
+        }
+        row.appendChild(cellCompany);
+        
+        let cellPriority = document.createElement('td');
+        cellPriority.innerHTML = `<span class="priority-badge priority-${ticket.priority.toLowerCase()}">${ticket.priority}</span>`;
+        row.appendChild(cellPriority);
+        
+        let cellUser = document.createElement('td');
+        if(ticket.createUser != null) {
+            const user = ticket.createUser;
+            const userText = `${user.firstName} ${user.lastName} (${user.email})`;
+            cellUser.textContent = userText;
+        } else {
+            cellUser.textContent = "Пользователь не выбран";
+        }
+        row.appendChild(cellUser);
+        
+        let cellStatus = document.createElement('td');
+        cellStatus.innerHTML = `<span class="status-badge status-${ticket.status.toLowerCase()}">${ticket.status}</span>`;
+        row.appendChild(cellStatus);
+        
+        let cellAction = document.createElement('td');
+        cellAction.className = 'edit';
+        let actionDiv = document.createElement('div');
+        actionDiv.className = 'action-buttons';
+        
+        let editBtn = document.createElement('button');
+        editBtn.className = 'action-btn edit';
+        editBtn.title = 'Редактировать';
+        editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+        editBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            window.location.href = '#request-id' + ticket.id;
         });
+        actionDiv.appendChild(editBtn);
+        
+        let deleteBtn = document.createElement('button');
+        deleteBtn.className = 'action-btn delete';
+        deleteBtn.title = 'Закрыть';
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            showDeleteModal(ticket.id);
+        });
+        actionDiv.appendChild(deleteBtn);
+        
+        cellAction.appendChild(actionDiv);
+        row.appendChild(cellAction);
+        
+        tableBody.appendChild(row);
     });
-});
+    
+    if (filtered.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;">Нет тикетов</td></tr>';
+    }
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+            // Если дата в формате DD.MM.YYYY
+            const parts = dateStr.split('.');
+            if (parts.length === 3) {
+                return dateStr; // Возвращаем как есть
+            }
+        }
+        return date.toLocaleDateString('ru-RU');
+    } catch (e) {
+        return dateStr;
+    }
+}
+
+function formatTime(timeStr) {
+    if (!timeStr) return '';
+    return timeStr;
+}
+
+function isDateMatch(dateStr) {
+    if (!dateStr) return false;
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(today);
+    monthAgo.setMonth(monthAgo.getMonth() - 1);
+    
+    let ticketDate;
+    try {
+        ticketDate = new Date(dateStr);
+        if (isNaN(ticketDate.getTime())) {
+            const parts = dateStr.split('.');
+            if (parts.length === 3) {
+                ticketDate = new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+        }
+    } catch (e) {
+        return false;
+    }
+    
+    switch (ticketFilters.date) {
+        case 'TODAY':
+            return ticketDate.toDateString() === today.toDateString();
+        case 'YESTERDAY':
+            return ticketDate.toDateString() === yesterday.toDateString();
+        case 'WEEK':
+            return ticketDate >= weekAgo;
+        case 'MONTH':
+            return ticketDate >= monthAgo;
+        default:
+            return true;
+    }
+}
 
 // Модальное окно подтверждения удаления
 function showDeleteModal(requestId) {

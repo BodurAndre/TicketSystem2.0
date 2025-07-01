@@ -14,8 +14,8 @@ function route() {
         loadPage('editRequest', id);
     } else if (hash === 'closed') {
         import('/NEW/js/tickets.js').then(module => module.renderClosedTicketsPage());
-    } else if (hash === 'loadAllTickets' || hash === '') {
-        loadPage('loadAllTickets');
+    } else if (hash === 'loadAllTickets' || hash === '#' || hash === '') {
+        loadPageHome();
     } else if (hash === 'MyAccount') {
         loadPageMyAccount();
     } else if (hash === 'statistics') {
@@ -93,6 +93,39 @@ async function loadPageUsers() {
 
         // Импортируем JS-модуль и вызываем init
         const scriptModule = await import(`/NEW/js/loadAllUsers.js?${Date.now()}`);
+        if (scriptModule.init) {
+            scriptModule.init();
+        }
+
+    } catch (err) {
+        containerApp.innerHTML = `<h2>Ошибка загрузки страницы</h2>`;
+        if (containerInformation) {
+            containerInformation.innerHTML = `<h2>Ошибка загрузки информации</h2>`;
+        }
+        console.error(err);
+    }
+}
+
+async function loadPageHome() {
+    const containerApp = document.getElementById('app');
+    const containerInformation = document.getElementById('information');
+
+    try {
+        // Загружаем HTML-шаблоны
+        const htmlApp = await fetch(`/NEW/html/loadAllTickets.html`).then(r => r.text());
+        const htmlInfo = await fetch(`/NEW/html/ticketInformation.html`).then(r => r.text());
+
+        // Вставляем их в соответствующие контейнеры
+        containerApp.innerHTML = htmlApp;
+        if (containerInformation) {
+            containerInformation.innerHTML = htmlInfo;
+        }
+
+        // Загружаем CSS файл
+        await loadCSS('/NEW/css/loadAllTickets.css');
+
+        // Импортируем JS-модуль и вызываем init
+        const scriptModule = await import(`/NEW/js/loadAllTickets.js?${Date.now()}`);
         if (scriptModule.init) {
             scriptModule.init();
         }

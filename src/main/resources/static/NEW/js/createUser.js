@@ -21,6 +21,8 @@ window.closeModal = function() {
     setTimeout(function() {
         window.location.hash = '#users';
     }, 300);
+
+    document.body.classList.remove('modal-open');
 };
 
 // Функция для показа модального окна
@@ -42,16 +44,16 @@ function showModal(email, password) {
     modal.style.zIndex = '10001';
     
     modal.innerHTML = `
-        <div style="background: #fff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 90vw; text-align: center;">
+        <div style="background: #fff; border-radius: 12px; padding: 32px 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 400px; max-width: 600px; width: 98vw; text-align: center; font-size: 1.15em;">
             <h3 style="margin-bottom: 18px; color: #27ae60;"><i class='fas fa-user-check'></i> Пользователь успешно создан!</h3>
             <p style="margin-bottom: 18px; color: #333;">Передайте следующие данные для входа пользователю:</p>
             <div style="margin-bottom: 24px;">
                 <div style="margin-bottom: 12px;">
-                    <label style="display:block;margin-bottom:4px;color:#666;font-size:0.9em;">Email:</label>
+                    <label style="display:block;margin-bottom:4px;color:#666;font-size:0.95em;">Email:</label>
                     <div style="font-size:1.1em;font-weight:bold;background:#f3f3f3;padding:8px 16px;border-radius:6px;font-family:monospace;">${email}</div>
                 </div>
                 <div>
-                    <label style="display:block;margin-bottom:4px;color:#666;font-size:0.9em;">Пароль:</label>
+                    <label style="display:block;margin-bottom:4px;color:#666;font-size:0.95em;">Пароль:</label>
                     <div style="font-size:1.1em;font-weight:bold;background:#f3f3f3;padding:8px 16px;border-radius:6px;font-family:monospace;">${password}</div>
                 </div>
             </div>
@@ -60,6 +62,7 @@ function showModal(email, password) {
     `;
     
     document.body.appendChild(modal);
+    document.body.classList.add('modal-open');
     
     // Добавляем обработчик клика вне модального окна
     modal.addEventListener('click', function(e) {

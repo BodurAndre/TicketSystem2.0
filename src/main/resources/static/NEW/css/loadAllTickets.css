@@ -1,4 +1,4 @@
-/* Стили для страницы списка тикетов */
+/* Стили для страницы списка пользователей */
 .table-container {
     padding: 20px;
     max-width: 1400px;
@@ -22,7 +22,7 @@
 
 .table-actions {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     align-items: center;
     flex-wrap: wrap;
 }
@@ -92,7 +92,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
-    min-width: 800px; /* Минимальная ширина таблицы */
+    min-width: 900px; /* Минимальная ширина таблицы */
 }
 
 .modern-table th {
@@ -102,9 +102,10 @@
     font-weight: 600;
     color: #555;
     border-bottom: 2px solid #e1e5e9;
-    white-space: nowrap; /* Предотвращаем перенос текста в заголовках */
     cursor: pointer;
     transition: background-color 0.2s;
+    position: relative;
+    white-space: nowrap; /* Предотвращаем перенос текста в заголовках */
 }
 
 .modern-table th:hover {
@@ -122,17 +123,34 @@
     background-color: #f8f9fa;
 }
 
-/* Стили для статусов */
-.status-open {
-    background: #d4edda;
-    color: #155724;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
+/* Стили для сортировки */
+.sort-arrow {
+    margin-left: 5px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
 }
 
-.status-closed {
+.sort-arrow.active {
+    opacity: 1;
+}
+
+.sort-arrow::after {
+    content: '↕';
+    font-size: 12px;
+}
+
+.sort-arrow.asc::after {
+    content: '↑';
+    color: #667eea;
+}
+
+.sort-arrow.desc::after {
+    content: '↓';
+    color: #667eea;
+}
+
+/* Стили для ролей */
+.role-admin {
     background: #f8d7da;
     color: #721c24;
     padding: 4px 8px;
@@ -141,8 +159,7 @@
     font-weight: 500;
 }
 
-/* Стили для приоритетов */
-.priority-low {
+.role-user {
     background: #d1ecf1;
     color: #0c5460;
     padding: 4px 8px;
@@ -151,7 +168,7 @@
     font-weight: 500;
 }
 
-.priority-medium {
+.role-processor {
     background: #fff3cd;
     color: #856404;
     padding: 4px 8px;
@@ -160,53 +177,23 @@
     font-weight: 500;
 }
 
-.priority-high {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-/* Стили для бейджей статусов и приоритетов */
-.status-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.status-badge.open {
-    background: #d4edda;
-    color: #155724;
-}
-
-.status-badge.closed {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.priority-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.priority-badge.low {
+/* Стили для пола */
+.gender-male {
     background: #d1ecf1;
     color: #0c5460;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
-.priority-badge.medium {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.priority-badge.high {
+.gender-female {
     background: #f8d7da;
     color: #721c24;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 /* Кнопки действий */
@@ -232,59 +219,39 @@
     color: #dc3545;
 }
 
-.action-btn.restore {
-    color: #28a745;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 5px;
-}
-
-/* Стили для сортировки */
-.sort-arrow {
-    margin-left: 5px;
-    opacity: 0.5;
-    transition: opacity 0.2s;
-}
-
-.sort-arrow.active {
-    opacity: 1;
-}
-
 /* Адаптивные стили */
 @media (max-width: 768px) {
     .table-container {
         padding: 10px;
     }
-    
+
     .table-header {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .table-actions {
         justify-content: center;
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .filter-group {
         flex-direction: row;
         align-items: center;
         gap: 10px;
     }
-    
+
     .modern-table {
         font-size: 12px;
-        min-width: 700px; /* Уменьшаем минимальную ширину для мобильных */
+        min-width: 800px; /* Уменьшаем минимальную ширину для мобильных */
     }
-    
+
     .modern-table th,
     .modern-table td {
         padding: 8px 6px;
     }
-    
+
     /* Индикатор прокрутки */
     .table-scroll-container::after {
         content: '';

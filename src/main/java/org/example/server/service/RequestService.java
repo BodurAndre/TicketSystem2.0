@@ -51,6 +51,10 @@ public class RequestService {
         return requestRepository.save(request);
     }
 
+    public Request saveRequest(Request request) {
+        return requestRepository.save(request);
+    }
+
     public Request getRequest(long id) {
         // Используйте Optional для безопасного получения данных
         return requestRepository.findById(id)

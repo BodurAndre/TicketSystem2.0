@@ -3,6 +3,10 @@
         <h2><i class="fas fa-list"></i> Список тикетов</h2>
         <div class="table-actions">
             <div class="filter-group">
+                <label for="search-input">Поиск:</label>
+                <input type="text" id="search-input" name="title" class="modern-filter" placeholder="Поиск по теме, описанию или пользователю...">
+            </div>
+            <div class="filter-group">
                 <label for="filter-status">Статус:</label>
                 <select id="filter-status" class="modern-filter">
                     <option value="ALL">Все статусы</option>
@@ -35,8 +39,8 @@
             <button class="refresh-btn" onclick="refreshTable()">
                 <i class="fas fa-sync-alt"></i> Обновить
             </button>
-            <button class="refresh-btn" id="show-closed-tickets-btn">
-                <i class="fas fa-archive"></i> Закрытые заявки
+            <button class="refresh-btn" id="reset-filters-btn">
+                <i class="fas fa-times"></i> Сбросить фильтры
             </button>
         </div>
     </div>
@@ -46,15 +50,16 @@
             <table class="modern-table" id="ticketsTable">
                 <thead>
                 <tr>
-                    <th class="request" data-sort="id"><i class="fas fa-hashtag"></i> ID <span class="sort-arrow" id="sort-id"></span></th>
-                    <th class="date" data-sort="data"><i class="fas fa-calendar"></i> Дата <span class="sort-arrow" id="sort-data"></span></th>
-                    <th class="time" data-sort="time"><i class="fas fa-clock"></i> Время <span class="sort-arrow" id="sort-time"></span></th>
-                    <th class="tema" data-sort="tema"><i class="fas fa-tag"></i> Тема <span class="sort-arrow" id="sort-tema"></span></th>
-                    <th class="company" data-sort="company"><i class="fas fa-building"></i> Компания <span class="sort-arrow" id="sort-company"></span></th>
-                    <th class="priority" data-sort="priority"><i class="fas fa-exclamation-triangle"></i> Приоритет <span class="sort-arrow" id="sort-priority"></span></th>
-                    <th class="from" data-sort="from"><i class="fas fa-user"></i> От <span class="sort-arrow" id="sort-from"></span></th>
-                    <th class="status" data-sort="status"><i class="fas fa-info-circle"></i> Статус <span class="sort-arrow" id="sort-status"></span></th>
-                    <th class="edit"><i class="fas fa-cogs"></i> Действие</th>
+                    <th class="request" data-sort="id" style="width: 40px;"><i class="fas fa-hashtag"></i> ID <span class="sort-arrow" id="sort-id"></span></th>
+                    <th class="date" data-sort="data" style="width: 100px;"><i class="fas fa-calendar"></i> Дата <span class="sort-arrow" id="sort-data"></span></th>
+                    <th class="time" data-sort="time" style="width: 80px;"><i class="fas fa-clock"></i> Время <span class="sort-arrow" id="sort-time"></span></th>
+                    <th class="tema" data-sort="tema" style="width: 200px;"><i class="fas fa-tag"></i> Тема <span class="sort-arrow" id="sort-tema"></span></th>
+                    <th class="company" data-sort="company" style="width: 150px;"><i class="fas fa-building"></i> Компания <span class="sort-arrow" id="sort-company"></span></th>
+                    <th class="priority" data-sort="priority" style="width: 100px;"><i class="fas fa-exclamation-triangle"></i> Приоритет <span class="sort-arrow" id="sort-priority"></span></th>
+                    <th class="from" data-sort="from" style="width: 120px;"><i class="fas fa-user"></i> От <span class="sort-arrow" id="sort-from"></span></th>
+                    <th class="assignee" data-sort="assignee" style="width: 120px;"><i class="fas fa-user-check"></i> Исполнитель <span class="sort-arrow" id="sort-assignee"></span></th>
+                    <th class="status" data-sort="status" style="width: 100px;"><i class="fas fa-info-circle"></i> Статус <span class="sort-arrow" id="sort-status"></span></th>
+                    <th class="edit" style="width: 100px;"><i class="fas fa-cogs"></i> Действие</th>
                 </tr>
                 </thead>
                 <tbody id="tickets-tbody">

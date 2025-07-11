@@ -27,16 +27,32 @@
     flex-wrap: wrap;
 }
 
+.filters-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.buttons-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 .filter-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 2px;
+    min-width: 150px;
 }
 
 .filter-group label {
     font-size: 12px;
     color: #666;
     font-weight: 500;
+    margin-bottom: 0;
 }
 
 .modern-filter {
@@ -46,6 +62,8 @@
     font-size: 14px;
     background: white;
     transition: border-color 0.3s;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 .modern-filter:focus {
@@ -67,6 +85,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 .refresh-btn:hover {
@@ -92,7 +112,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
-    min-width: 900px; /* Минимальная ширина таблицы */
+    min-width: 1140px; /* Уменьшаем минимальную ширину после уменьшения ID */
 }
 
 .modern-table th {
@@ -117,6 +137,31 @@
     border-bottom: 1px solid #f1f3f4;
     vertical-align: middle;
     white-space: nowrap; /* Предотвращаем перенос текста в ячейках */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Специальные стили для колонок с длинным текстом */
+.modern-table td:nth-child(4) { /* Тема */
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modern-table td:nth-child(5) { /* Компания */
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modern-table td:nth-child(7), /* От */
+.modern-table td:nth-child(8) { /* Исполнитель */
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .modern-table tbody tr:hover {
@@ -196,6 +241,49 @@
     font-weight: 500;
 }
 
+/* Стили для статусов заявок */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-open {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-closed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Стили для приоритетов заявок */
+.priority-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.priority-high {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.priority-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.priority-low {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
 /* Кнопки действий */
 .action-btn {
     background: none;
@@ -231,15 +319,14 @@
     }
 
     .table-actions {
-        justify-content: center;
         flex-direction: column;
         gap: 10px;
+        align-items: stretch;
     }
 
     .filter-group {
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
+        min-width: auto;
+        width: 100%;
     }
 
     .modern-table {

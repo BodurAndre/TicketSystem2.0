@@ -1,25 +1,159 @@
 // loadAllTickets.js — точка входа для главной страницы тикетов
 
 let allTickets = [];
-let ticketSort = { field: null, asc: true };
+let ticketSort = { field: 'id', asc: false }; // По умолчанию сортируем по ID в убывающем порядке
 let ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL' };
 
+// Функции для работы с localStorage
+function saveFilters() {
+    localStorage.setItem('ticketFilters', JSON.stringify(ticketFilters));
+    localStorage.setItem('ticketSort', JSON.stringify(ticketSort));
+}
+
+function loadFilters() {
+    const savedFilters = localStorage.getItem('ticketFilters');
+    const savedSort = localStorage.getItem('ticketSort');
+    
+    if (savedFilters) {
+        ticketFilters = JSON.parse(savedFilters);
+    }
+    
+    if (savedSort) {
+        ticketSort = JSON.parse(savedSort);
+    } else {
+        // Если нет сохраненной сортировки, устанавливаем по умолчанию
+        ticketSort = { field: 'id', asc: false };
+    }
+}
+
+function applySavedFilters() {
+    // Применяем сохраненные значения к элементам формы
+    const globalSearch = document.getElementById('search-input');
+    if (globalSearch && ticketFilters.search) {
+        globalSearch.value = ticketFilters.search;
+    }
+    
+    const status = document.getElementById('filter-status');
+    if (status && ticketFilters.status) {
+        status.value = ticketFilters.status;
+    }
+    
+    const priority = document.getElementById('filter-priority');
+    if (priority && ticketFilters.priority) {
+        priority.value = ticketFilters.priority;
+    }
+    
+    const date = document.getElementById('filter-date');
+    if (date && ticketFilters.date) {
+        date.value = ticketFilters.date;
+    }
+}
+
+function resetFilters() {
+    ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL' };
+    ticketSort = { field: 'id', asc: false }; // Сбрасываем к сортировке по ID в убывающем порядке
+    
+    // Очищаем поля формы
+    const globalSearch = document.getElementById('search-input');
+    if (globalSearch) {
+        globalSearch.value = '';
+    }
+    
+    const status = document.getElementById('filter-status');
+    if (status) {
+        status.value = 'ALL';
+    }
+    
+    const priority = document.getElementById('filter-priority');
+    if (priority) {
+        priority.value = 'ALL';
+    }
+    
+    const date = document.getElementById('filter-date');
+    if (date) {
+        date.value = 'ALL';
+    }
+    
+    // Очищаем стрелки сортировки
+    document.querySelectorAll('.sort-arrow').forEach(el => el.innerHTML = '');
+    
+    // Устанавливаем стрелку для сортировки по ID
+    const arrow = document.getElementById('sort-id');
+    if (arrow) {
+        arrow.innerHTML = '<i class="fas fa-chevron-down" style="color:#3498db;font-size:0.9em;"></i>';
+    }
+    
+    // Сохраняем сброшенные фильтры
+    saveFilters();
+    
+    // Перерисовываем таблицу
+    renderFilteredTickets();
+}
+
 export function init() {
+    // Загружаем сохраненные фильтры
+    loadFilters();
+    
     refreshTable();
+    
     // Навешиваем обработчики после загрузки таблицы
     setTimeout(() => {
+        // Применяем сохраненные фильтры к элементам формы
+        applySavedFilters();
+        
+        // Устанавливаем стрелку сортировки
+        document.querySelectorAll('.sort-arrow').forEach(el => el.innerHTML = '');
+        if (ticketSort.field) {
+            const arrow = document.getElementById('sort-' + ticketSort.field);
+            if (arrow) {
+                arrow.innerHTML = ticketSort.asc ? 
+                    '<i class="fas fa-chevron-up" style="color:#3498db;font-size:0.9em;"></i>' : 
+                    '<i class="fas fa-chevron-down" style="color:#3498db;font-size:0.9em;"></i>';
+            }
+        }
+        
         // Используем глобальный поиск
-        const globalSearch = document.querySelector('input[name="title"]');
-        if (globalSearch) globalSearch.oninput = (e) => { ticketFilters.search = e.target.value; renderFilteredTickets(); };
+        const globalSearch = document.getElementById('search-input');
+        if (globalSearch) {
+            globalSearch.oninput = (e) => { 
+                ticketFilters.search = e.target.value; 
+                saveFilters();
+                renderFilteredTickets(); 
+            };
+        }
         
         const status = document.getElementById('filter-status');
-        if (status) status.onchange = (e) => { ticketFilters.status = e.target.value; renderFilteredTickets(); };
+        if (status) {
+            status.onchange = (e) => { 
+                ticketFilters.status = e.target.value; 
+                saveFilters();
+                renderFilteredTickets(); 
+            };
+        }
         
         const priority = document.getElementById('filter-priority');
-        if (priority) priority.onchange = (e) => { ticketFilters.priority = e.target.value; renderFilteredTickets(); };
+        if (priority) {
+            priority.onchange = (e) => { 
+                ticketFilters.priority = e.target.value; 
+                saveFilters();
+                renderFilteredTickets(); 
+            };
+        }
         
         const date = document.getElementById('filter-date');
-        if (date) date.onchange = (e) => { ticketFilters.date = e.target.value; renderFilteredTickets(); };
+        if (date) {
+            date.onchange = (e) => { 
+                ticketFilters.date = e.target.value; 
+                saveFilters();
+                renderFilteredTickets(); 
+            };
+        }
+        
+        // Добавляем обработчик для кнопки сброса фильтров
+        const resetBtn = document.getElementById('reset-filters-btn');
+        if (resetBtn) {
+            resetBtn.onclick = resetFilters;
+        }
         
         document.querySelectorAll('.modern-table th[data-sort]').forEach(th => {
             th.style.cursor = 'pointer';
@@ -31,6 +165,7 @@ export function init() {
                     ticketSort.field = field;
                     ticketSort.asc = true;
                 }
+                saveFilters();
                 renderFilteredTickets();
             };
         });
@@ -76,6 +211,9 @@ function renderFilteredTickets() {
             if (ticketSort.field === 'from') {
                 v1 = a.createUser ? (a.createUser.firstName + ' ' + a.createUser.lastName) : '';
                 v2 = b.createUser ? (b.createUser.firstName + ' ' + b.createUser.lastName) : '';
+            } else if (ticketSort.field === 'assignee') {
+                v1 = a.assigneeUser ? (a.assigneeUser.firstName + ' ' + a.assigneeUser.lastName) : '';
+                v2 = b.assigneeUser ? (b.assigneeUser.firstName + ' ' + b.assigneeUser.lastName) : '';
             }
             if (typeof v1 === 'string') v1 = v1.toLowerCase();
             if (typeof v2 === 'string') v2 = v2.toLowerCase();
@@ -131,12 +269,22 @@ function renderFilteredTickets() {
         let cellUser = document.createElement('td');
         if(ticket.createUser != null) {
             const user = ticket.createUser;
-            const userText = `${user.firstName} ${user.lastName} (${user.email})`;
+            const userText = `${user.firstName} ${user.lastName}`;
             cellUser.textContent = userText;
         } else {
-            cellUser.textContent = "Пользователь не выбран";
+            cellUser.textContent = "Не указан";
         }
         row.appendChild(cellUser);
+        
+        let cellAssignee = document.createElement('td');
+        if(ticket.assigneeUser != null) {
+            const assignee = ticket.assigneeUser;
+            const assigneeText = `${assignee.firstName} ${assignee.lastName}`;
+            cellAssignee.textContent = assigneeText;
+        } else {
+            cellAssignee.textContent = "Не назначен";
+        }
+        row.appendChild(cellAssignee);
         
         let cellStatus = document.createElement('td');
         cellStatus.innerHTML = `<span class="status-badge status-${ticket.status.toLowerCase()}">${ticket.status}</span>`;
@@ -174,22 +322,28 @@ function renderFilteredTickets() {
     });
     
     if (filtered.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;">Нет тикетов</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#aaa;">Нет тикетов</td></tr>';
     }
 }
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
     try {
+        // Проверяем, если дата уже в формате DD.MM.YYYY
+        if (typeof dateStr === 'string' && dateStr.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
+            return dateStr; // Возвращаем как есть
+        }
+        
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) {
-            // Если дата в формате DD.MM.YYYY
-            const parts = dateStr.split('.');
-            if (parts.length === 3) {
-                return dateStr; // Возвращаем как есть
-            }
+            return dateStr; // Возвращаем исходную строку если не удалось распарсить
         }
-        return date.toLocaleDateString('ru-RU');
+        
+        // Форматируем в DD.MM.YYYY
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
     } catch (e) {
         return dateStr;
     }
@@ -202,6 +356,24 @@ function formatTime(timeStr) {
 
 function isDateMatch(dateStr) {
     if (!dateStr) return false;
+    
+    let ticketDate;
+    try {
+        // Проверяем, если дата в формате DD.MM.YYYY
+        if (typeof dateStr === 'string' && dateStr.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
+            const parts = dateStr.split('.');
+            ticketDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+        } else {
+            ticketDate = new Date(dateStr);
+        }
+        
+        if (isNaN(ticketDate.getTime())) {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+    
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -210,28 +382,28 @@ function isDateMatch(dateStr) {
     const monthAgo = new Date(today);
     monthAgo.setMonth(monthAgo.getMonth() - 1);
     
-    let ticketDate;
-    try {
-        ticketDate = new Date(dateStr);
-        if (isNaN(ticketDate.getTime())) {
-            const parts = dateStr.split('.');
-            if (parts.length === 3) {
-                ticketDate = new Date(parts[2], parts[1] - 1, parts[0]);
-            }
-        }
-    } catch (e) {
-        return false;
-    }
+    // Сбрасываем время для корректного сравнения дат
+    const resetTime = (date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    };
+    
+    const ticketDateOnly = resetTime(ticketDate);
+    const todayOnly = resetTime(today);
+    const yesterdayOnly = resetTime(yesterday);
+    const weekAgoOnly = resetTime(weekAgo);
+    const monthAgoOnly = resetTime(monthAgo);
     
     switch (ticketFilters.date) {
         case 'TODAY':
-            return ticketDate.toDateString() === today.toDateString();
+            return ticketDateOnly.getTime() === todayOnly.getTime();
         case 'YESTERDAY':
-            return ticketDate.toDateString() === yesterday.toDateString();
+            return ticketDateOnly.getTime() === yesterdayOnly.getTime();
         case 'WEEK':
-            return ticketDate >= weekAgo;
+            return ticketDateOnly >= weekAgoOnly;
         case 'MONTH':
-            return ticketDate >= monthAgo;
+            return ticketDateOnly >= monthAgoOnly;
         default:
             return true;
     }

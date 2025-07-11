@@ -47,6 +47,20 @@ public class UserController {
         return userService.getAllUsersWithoutCurrentUser(username);
     }
 
+    @GetMapping(value = "/api/users", produces = "application/json")
+    @ResponseBody
+    public List<User> getApiUsers() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+        return userService.getAllUsersWithoutCurrentUser(username);
+    }
+
     @GetMapping(value = "/getUser/{id}", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> getRequest(@PathVariable long id) {

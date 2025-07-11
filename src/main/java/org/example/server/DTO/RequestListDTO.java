@@ -12,6 +12,8 @@ public class RequestListDTO {
     private ServerListDTO server;
     private String contacts;
     private UserListDTO createUser;
+    private UserListDTO assigneeUser;
+    private UserListDTO closedByUser;
     private String status;
     private String priority;
     private String description;

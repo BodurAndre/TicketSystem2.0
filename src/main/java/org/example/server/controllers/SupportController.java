@@ -254,6 +254,16 @@ public class SupportController {
                 request.setServer(server);
             }
 
+            // Назначаем исполнителя, если передан корректный ID
+            if (requestDTO.getAssigneeUserId() != null) {
+                User assignee = userService.getUser(requestDTO.getAssigneeUserId());
+                if (assignee != null) {
+                    request.setAssigneeUser(assignee);
+                } else {
+                    log.warn("Исполнитель с ID " + requestDTO.getAssigneeUserId() + " не найден");
+                }
+            }
+
             // Сохраняем
             Request savedRequest = requestService.setRequest(request);
 
@@ -273,6 +283,24 @@ public class SupportController {
     public ResponseEntity<String> closeRequest(@RequestBody long id) {
         try {
             log.info("ID request", id);
+            
+            // Получаем текущего пользователя
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username;
+            if (principal instanceof UserDetails) {
+                username = ((UserDetails) principal).getUsername();
+            } else {
+                username = principal.toString();
+            }
+            User currentUser = userService.getUserByEmail(username);
+            
+            // Получаем заявку и устанавливаем кто закрыл
+            Request request = requestService.getRequest(id);
+            if (request != null) {
+                request.setClosedByUser(currentUser);
+                requestService.setRequest(request);
+            }
+            
             requestService.closeRequest(id);
             return ResponseEntity.status(HttpStatus.CREATED).body("{\"message\": \"Заявка закрыта\"}");
         } catch (Exception e) {
@@ -282,46 +310,72 @@ public class SupportController {
     }
 
 
-//    @PostMapping("/updateRequest")
-//    public ResponseEntity<String> updateRequest(@RequestBody RequestUpdateDTO requestData) {
-//        try {
-//            log.warn("requestData - " + requestData);
-//
-//            // Получаем заявку
-//            Request request = requestService.getRequest(requestData.getRequestId());
-//            if (request == null) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body("{\"message\": \"Заявка не найдена\"}");
-//            }
-//
-//            // Обновляем поля заявки
-//            request.setTema(requestData.getTema());
-//            request.setPriority(requestData.getPriority());
-//            request.setDescription(requestData.getDescription());
-//
-//            // Назначаем пользователя, если передан корректный ID
-//            if (requestData.getUserId() != null) {
-//                User user = userService.getUser(requestData.getUserId());
-//                if (user != null) {
-//                    request.setAssigneeUser(user);
-//                } else {
-//                    log.warn("Пользователь с ID " + requestData.getUserId() + " не найден");
-//                    // можно проигнорировать или вернуть ошибку — по желанию
-//                }
-//            }
-//
-//            // Сохраняем изменения
-//            requestService.setRequest(request);
-//
-//            return ResponseEntity.status(HttpStatus.CREATED)
-//                    .body("{\"message\": \"Заявка обновлена\"}");
-//
-//        } catch (Exception e) {
-//            log.error("Internal server error: " + e.getMessage(), e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("{\"message\": \"Ошибка при обновлении заявки\"}");
-//        }
-//    }
+    @PostMapping("/updateRequest")
+    public ResponseEntity<String> updateRequest(@RequestBody RequestUpdateDTO requestData) {
+        try {
+            log.warn("requestData - " + requestData);
+            log.warn("assigneeUserId - " + requestData.getAssigneeUserId());
+
+            // Получаем заявку
+            Request request = requestService.getRequest(requestData.getRequestId());
+            if (request == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("{\"message\": \"Заявка не найдена\"}");
+            }
+
+            // Обновляем поля заявки
+            request.setTema(requestData.getTema());
+            request.setPriority(requestData.getPriority());
+            request.setDescription(requestData.getDescription());
+            request.setContacts(requestData.getContacts());
+
+            // Назначаем пользователя, если передан корректный ID
+            if (requestData.getAssigneeUserId() != null) {
+                User user = userService.getUser(requestData.getAssigneeUserId());
+                if (user != null) {
+                    request.setAssigneeUser(user);
+                    log.warn("Назначен пользователь: " + user.getFirstName() + " " + user.getLastName());
+                } else {
+                    log.warn("Пользователь с ID " + requestData.getAssigneeUserId() + " не найден");
+                }
+            } else {
+                // Если assigneeUserId null, убираем назначение
+                request.setAssigneeUser(null);
+                log.warn("Убрано назначение пользователя");
+            }
+
+            // Обновляем компанию
+            if (requestData.getCompanyId() != null) {
+                Company company = companyService.getCompanyById(requestData.getCompanyId());
+                if (company != null) {
+                    request.setCompany(company);
+                } else {
+                    log.warn("Компания с ID " + requestData.getCompanyId() + " не найдена");
+                }
+            }
+
+            // Обновляем сервер
+            if (requestData.getServerId() != null) {
+                Server server = serverService.getServerById(requestData.getServerId());
+                if (server != null) {
+                    request.setServer(server);
+                } else {
+                    log.warn("Сервер с ID " + requestData.getServerId() + " не найден");
+                }
+            }
+
+            // Сохраняем изменения
+            requestService.setRequest(request);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("{\"message\": \"Заявка обновлена\"}");
+
+        } catch (Exception e) {
+            log.error("Internal server error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при обновлении заявки\"}");
+        }
+    }
 
 
     @PostMapping("/reopenRequest")
@@ -564,6 +618,27 @@ public class SupportController {
         }
         else createUser = null;
         dto.setCreateUser(createUser);
+
+        // assigneeUser
+        RequestListDTO.UserListDTO assigneeUser = new RequestListDTO.UserListDTO();
+        if(request.getAssigneeUser()!=null){
+            assigneeUser.setEmail(request.getAssigneeUser().getEmail());
+            assigneeUser.setFirstName(request.getAssigneeUser().getFirstName());
+            assigneeUser.setLastName(request.getAssigneeUser().getLastName());
+        }
+        else assigneeUser = null;
+        dto.setAssigneeUser(assigneeUser);
+
+        // closedByUser
+        RequestListDTO.UserListDTO closedByUser = new RequestListDTO.UserListDTO();
+        if(request.getClosedByUser()!=null){
+            closedByUser.setEmail(request.getClosedByUser().getEmail());
+            closedByUser.setFirstName(request.getClosedByUser().getFirstName());
+            closedByUser.setLastName(request.getClosedByUser().getLastName());
+        }
+        else closedByUser = null;
+        dto.setClosedByUser(closedByUser);
+        
         return dto;
     }
 

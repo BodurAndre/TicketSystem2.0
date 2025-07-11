@@ -42,6 +42,14 @@ public class Request {
     @JoinColumn(name = "create_user_id") // внешний ключ в таблице tikets
     private User createUser;
 
+    @ManyToOne
+    @JoinColumn(name = "assignee_user_id") // внешний ключ для исполнителя заявки
+    private User assigneeUser;
+
+    @ManyToOne
+    @JoinColumn(name = "closed_by_user_id") // внешний ключ для пользователя, закрывшего заявку
+    private User closedByUser;
+
     @Column(name = "status")
     private String status;
 

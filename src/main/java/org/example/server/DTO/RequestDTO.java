@@ -10,8 +10,8 @@ public class RequestDTO {
     private String status;
     private String priority;
     private String description;
-    private Long user;
     private Long companyId;
     private Long serverId;
+    private Long assigneeUserId;
     private String contacts;
 }

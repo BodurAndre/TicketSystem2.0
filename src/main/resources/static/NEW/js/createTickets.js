@@ -9,6 +9,7 @@ export function init() {
     testAPI();
     
     loadCompanies();
+    loadUsers();
     setupFormHandlers();
     setupModalHandlers();
     console.log('Инициализация завершена');
@@ -204,6 +205,57 @@ async function loadPhoneNumbersByCompany(companyId) {
     }
 }
 
+// Загрузка списка пользователей
+async function loadUsers() {
+    try {
+        console.log('Загружаем пользователей...');
+        const response = await fetch('/getUsers');
+        console.log('Ответ от сервера:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Ошибка ответа:', errorText);
+            throw new Error(`Ошибка загрузки пользователей: ${response.status} ${response.statusText}`);
+        }
+        
+        const users = await response.json();
+        console.log('Полученные пользователи:', users);
+        
+        // Отладочная информация для первого пользователя
+        if (users.length > 0) {
+            console.log('Структура первого пользователя:', users[0]);
+            console.log('user.ID:', users[0].ID);
+            console.log('user.id:', users[0].id);
+            console.log('user.userId:', users[0].userId);
+        }
+        
+        const userSelect = document.getElementById('assignee-user');
+        if (!userSelect) {
+            console.error('Элемент assignee-user не найден');
+            return;
+        }
+        
+        // Очищаем существующие опции
+        userSelect.innerHTML = '<option value="" disabled selected>Выберите исполнителя</option>';
+        
+        // Добавляем пользователей
+        users.forEach(user => {
+            const option = document.createElement('option');
+            // Используем правильное поле для ID
+            const userId = user.ID || user.id || user.userId;
+            option.value = userId;
+            option.textContent = `${user.firstName} ${user.lastName} (${user.email})`;
+            userSelect.appendChild(option);
+            console.log(`Добавлен пользователь: ${user.firstName} ${user.lastName} с ID: ${userId}`);
+        });
+        
+        console.log('Пользователи загружены успешно');
+    } catch (error) {
+        console.error('Ошибка загрузки пользователей:', error);
+        showNotification('Ошибка загрузки списка пользователей: ' + error.message, 'error');
+    }
+}
+
 // Настройка обработчиков событий
 function setupFormHandlers() {
     // Обработчик изменения компании
@@ -244,11 +296,10 @@ function setupModalHandlers() {
     const addCompanyBtn = document.getElementById('add-company-btn');
     const addServerBtn = document.getElementById('add-server-btn');
     const addPhoneBtn = document.getElementById('add-phone-btn');
-    
-    addCompanyBtn.addEventListener('click', () => openModal('company-modal'));
-    addServerBtn.addEventListener('click', () => openModal('server-modal'));
-    addPhoneBtn.addEventListener('click', () => openModal('phone-modal'));
-    
+    if (addCompanyBtn) addCompanyBtn.addEventListener('click', () => openModal('company-modal'));
+    if (addServerBtn) addServerBtn.addEventListener('click', () => openModal('server-modal'));
+    if (addPhoneBtn) addPhoneBtn.addEventListener('click', () => openModal('phone-modal'));
+
     // Кнопки закрытия модальных окон
     const closeCompanyModal = document.getElementById('close-company-modal');
     const closeServerModal = document.getElementById('close-server-modal');
@@ -256,29 +307,27 @@ function setupModalHandlers() {
     const cancelCompany = document.getElementById('cancel-company');
     const cancelServer = document.getElementById('cancel-server');
     const cancelPhone = document.getElementById('cancel-phone');
-    
-    closeCompanyModal.addEventListener('click', () => closeModal('company-modal'));
-    closeServerModal.addEventListener('click', () => closeModal('server-modal'));
-    closePhoneModal.addEventListener('click', () => closeModal('phone-modal'));
-    cancelCompany.addEventListener('click', () => closeModal('company-modal'));
-    cancelServer.addEventListener('click', () => closeModal('server-modal'));
-    cancelPhone.addEventListener('click', () => closeModal('phone-modal'));
-    
+    if (closeCompanyModal) closeCompanyModal.addEventListener('click', () => closeModal('company-modal'));
+    if (closeServerModal) closeServerModal.addEventListener('click', () => closeModal('server-modal'));
+    if (closePhoneModal) closePhoneModal.addEventListener('click', () => closeModal('phone-modal'));
+    if (cancelCompany) cancelCompany.addEventListener('click', () => closeModal('company-modal'));
+    if (cancelServer) cancelServer.addEventListener('click', () => closeModal('server-modal'));
+    if (cancelPhone) cancelPhone.addEventListener('click', () => closeModal('phone-modal'));
+
     // Закрытие по клику вне модального окна
     window.addEventListener('click', (event) => {
-        if (event.target.classList.contains('modal')) {
+        if (event.target.classList && event.target.classList.contains('modal')) {
             closeModal(event.target.id);
         }
     });
-    
+
     // Обработчики форм создания
     const createCompanyForm = document.getElementById('create-company-form');
     const createServerForm = document.getElementById('create-server-form');
     const createPhoneForm = document.getElementById('create-phone-form');
-    
-    createCompanyForm.addEventListener('submit', handleCreateCompany);
-    createServerForm.addEventListener('submit', handleCreateServer);
-    createPhoneForm.addEventListener('submit', handleCreatePhone);
+    if (createCompanyForm) createCompanyForm.addEventListener('submit', handleCreateCompany);
+    if (createServerForm) createServerForm.addEventListener('submit', handleCreateServer);
+    if (createPhoneForm) createPhoneForm.addEventListener('submit', handleCreatePhone);
 }
 
 // Функции для работы с модальными окнами
@@ -422,6 +471,17 @@ async function handleFormSubmit(event) {
     event.preventDefault();
     
     const formData = new FormData(event.target);
+    
+    // Отладочная информация
+    console.log('FormData entries:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+    
+    const assigneeUserId = formData.get('assigneeUserId');
+    console.log('assigneeUserId from form:', assigneeUserId);
+    console.log('assigneeUserId type:', typeof assigneeUserId);
+    
     const requestData = {
         data: new Date().toLocaleDateString('ru-RU'),
         time: new Date().toLocaleTimeString('ru-RU'),
@@ -430,9 +490,12 @@ async function handleFormSubmit(event) {
         companyId: parseInt(formData.get('companyId')),
         serverId: parseInt(formData.get('serverId')),
         contacts: formData.get('contacts'),
+        assigneeUserId: assigneeUserId ? parseInt(assigneeUserId) : null,
         description: formData.get('description'),
         status: 'OPEN'
     };
+
+    console.log('Final requestData:', requestData);
 
     try {
         const csrf = await getCsrfToken();

@@ -32,7 +32,7 @@
                 <div class="input-item">
                     <label for="select-server">Сервер:</label>
                     <div class="select-with-button">
-                        <select id="select-server" name="serverId" required disabled>
+                        <select id="select-server" name="serverId" required>
                             <option value="" disabled selected>Сначала выберите компанию</option>
                         </select>
                         <button type="button" id="add-server-btn" class="add-btn" title="Добавить новый сервер" disabled>
@@ -43,15 +43,19 @@
             </div>
             <div class="input-group">
                 <div class="input-item">
-                    <label for="select-contacts">Контакты:</label>
+                    <label for="contacts">Контакты:</label>
                     <div class="select-with-button">
-                        <select id="select-contacts" name="contacts" required disabled>
-                            <option value="" disabled selected>Сначала выберите компанию</option>
-                        </select>
+                        <input type="text" id="contacts" name="contacts" placeholder="Введите контакты" required>
                         <button type="button" id="add-phone-btn" class="add-btn" title="Добавить новый номер телефона" disabled>
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
+                </div>
+                <div class="input-item">
+                    <label for="assignee-user">Назначить на:</label>
+                    <select id="assignee-user" name="assigneeUserId">
+                        <option value="" disabled selected>Выберите исполнителя</option>
+                    </select>
                 </div>
             </div>
             <label for="description">Описание:</label>

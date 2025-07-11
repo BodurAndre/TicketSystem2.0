@@ -204,10 +204,10 @@ async function loadPageStatistics() {
         // Загружаем CSS файл
         await loadCSS('/NEW/css/statistics.css');
         
-        // Загружаем JavaScript файл
+        // Загружаем JavaScript файл и вызываем инициализацию
         const scriptModule = await import(`/NEW/js/statistics.js?${Date.now()}`);
-        if (scriptModule.init) {
-            scriptModule.init();
+        if (window.initStatistics) {
+            window.initStatistics();
         }
     } catch (err) {
         containerApp.innerHTML = `<h2>Ошибка загрузки страницы статистики</h2>`;

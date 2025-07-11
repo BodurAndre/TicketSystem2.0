@@ -140,6 +140,25 @@ public class UserController {
         return ResponseEntity.ok(userDTO);
     }
 
+    @GetMapping(value = "/users", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> getAllUsersForStatistics() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Пользователь не аутентифицирован");
+        }
+
+        try {
+            List<User> users = userService.getAllUsers();
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            log.error("Error getting users for statistics: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при получении списка пользователей\"}");
+        }
+    }
+
     @PostMapping("/updateUser")
     public ResponseEntity<?> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
         try {

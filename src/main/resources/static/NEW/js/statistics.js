@@ -9,6 +9,18 @@ window.initStatistics = async function() {
     }
 };
 
+// Функция обновления статистики
+window.refreshStatistics = async function() {
+    console.log('Обновление статистики...');
+    try {
+        await loadStatistics();
+        showNotification('Статистика обновлена', 'success');
+    } catch (error) {
+        console.error('Ошибка обновления статистики:', error);
+        showNotification('Ошибка обновления статистики', 'error');
+    }
+};
+
 // Загрузка статистических данных
 async function loadStatistics() {
     console.log('Загрузка статистических данных...');

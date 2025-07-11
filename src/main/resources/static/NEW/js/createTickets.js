@@ -10,6 +10,7 @@ export function init() {
     
     loadCompanies();
     setupFormHandlers();
+    setupModalHandlers();
     console.log('Инициализация завершена');
 }
 
@@ -163,24 +164,257 @@ async function loadServersByCompany(companyId) {
     }
 }
 
+// Загрузка номеров телефонов по выбранной компании
+async function loadPhoneNumbersByCompany(companyId) {
+    try {
+        console.log('Загружаем номера телефонов для компании:', companyId);
+        const response = await fetch(`/api/phoneNumbers/${companyId}`);
+        console.log('Ответ от сервера:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Ошибка ответа:', errorText);
+            throw new Error(`Ошибка загрузки номеров телефонов: ${response.status} ${response.statusText}`);
+        }
+        
+        const phoneNumbers = await response.json();
+        console.log('Полученные номера телефонов:', phoneNumbers);
+        
+        const contactsSelect = document.getElementById('select-contacts');
+        if (!contactsSelect) {
+            console.error('Элемент select-contacts не найден');
+            return;
+        }
+        
+        // Очищаем существующие опции
+        contactsSelect.innerHTML = '<option value="" disabled selected>Выберите номер телефона</option>';
+        
+        // Добавляем номера телефонов
+        phoneNumbers.forEach(phone => {
+            const option = document.createElement('option');
+            option.value = phone.number;
+            option.textContent = phone.number;
+            contactsSelect.appendChild(option);
+        });
+        
+        console.log('Номера телефонов загружены успешно');
+    } catch (error) {
+        console.error('Ошибка загрузки номеров телефонов:', error);
+        showNotification('Ошибка загрузки списка номеров телефонов: ' + error.message, 'error');
+    }
+}
+
 // Настройка обработчиков событий
 function setupFormHandlers() {
     // Обработчик изменения компании
     const companySelect = document.getElementById('select-company');
     companySelect.addEventListener('change', function() {
         const companyId = this.value;
+        const serverSelect = document.getElementById('select-server');
+        const addServerBtn = document.getElementById('add-server-btn');
+        const contactsSelect = document.getElementById('select-contacts');
+        const addPhoneBtn = document.getElementById('add-phone-btn');
+        
         if (companyId) {
             loadServersByCompany(companyId);
+            loadPhoneNumbersByCompany(companyId);
+            serverSelect.disabled = false;
+            addServerBtn.disabled = false;
+            contactsSelect.disabled = false;
+            addPhoneBtn.disabled = false;
         } else {
-            // Сброс серверов если компания не выбрана
-            const serverSelect = document.getElementById('select-server');
+            // Сброс серверов и контактов если компания не выбрана
             serverSelect.innerHTML = '<option value="" disabled selected>Сначала выберите компанию</option>';
+            serverSelect.disabled = true;
+            addServerBtn.disabled = true;
+            contactsSelect.innerHTML = '<option value="" disabled selected>Сначала выберите компанию</option>';
+            contactsSelect.disabled = true;
+            addPhoneBtn.disabled = true;
         }
     });
 
     // Обработчик отправки формы
     const form = document.getElementById('create-request-form');
     form.addEventListener('submit', handleFormSubmit);
+}
+
+// Настройка обработчиков модальных окон
+function setupModalHandlers() {
+    // Кнопки открытия модальных окон
+    const addCompanyBtn = document.getElementById('add-company-btn');
+    const addServerBtn = document.getElementById('add-server-btn');
+    const addPhoneBtn = document.getElementById('add-phone-btn');
+    
+    addCompanyBtn.addEventListener('click', () => openModal('company-modal'));
+    addServerBtn.addEventListener('click', () => openModal('server-modal'));
+    addPhoneBtn.addEventListener('click', () => openModal('phone-modal'));
+    
+    // Кнопки закрытия модальных окон
+    const closeCompanyModal = document.getElementById('close-company-modal');
+    const closeServerModal = document.getElementById('close-server-modal');
+    const closePhoneModal = document.getElementById('close-phone-modal');
+    const cancelCompany = document.getElementById('cancel-company');
+    const cancelServer = document.getElementById('cancel-server');
+    const cancelPhone = document.getElementById('cancel-phone');
+    
+    closeCompanyModal.addEventListener('click', () => closeModal('company-modal'));
+    closeServerModal.addEventListener('click', () => closeModal('server-modal'));
+    closePhoneModal.addEventListener('click', () => closeModal('phone-modal'));
+    cancelCompany.addEventListener('click', () => closeModal('company-modal'));
+    cancelServer.addEventListener('click', () => closeModal('server-modal'));
+    cancelPhone.addEventListener('click', () => closeModal('phone-modal'));
+    
+    // Закрытие по клику вне модального окна
+    window.addEventListener('click', (event) => {
+        if (event.target.classList.contains('modal')) {
+            closeModal(event.target.id);
+        }
+    });
+    
+    // Обработчики форм создания
+    const createCompanyForm = document.getElementById('create-company-form');
+    const createServerForm = document.getElementById('create-server-form');
+    const createPhoneForm = document.getElementById('create-phone-form');
+    
+    createCompanyForm.addEventListener('submit', handleCreateCompany);
+    createServerForm.addEventListener('submit', handleCreateServer);
+    createPhoneForm.addEventListener('submit', handleCreatePhone);
+}
+
+// Функции для работы с модальными окнами
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Фокус на первое поле ввода
+        const firstInput = modal.querySelector('input');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Очистка формы
+        const form = modal.querySelector('form');
+        if (form) {
+            form.reset();
+        }
+    }
+}
+
+// Обработчик создания компании
+async function handleCreateCompany(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const companyName = formData.get('companyName').trim();
+    
+    if (!companyName) {
+        showNotification('Введите название компании', 'error');
+        return;
+    }
+    
+    try {
+        const csrf = await getCsrfToken();
+        
+        const companyData = {
+            name: companyName
+        };
+        
+        $.ajax({
+            url: "/api/create-company",
+            method: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(companyData),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function(data) {
+                console.log('Компания создана:', data);
+                showNotification('Компания успешно создана', 'success');
+                closeModal('company-modal');
+                
+                // Перезагружаем список компаний
+                setTimeout(() => {
+                    loadCompanies();
+                }, 500);
+            },
+            error: function(error) {
+                console.error("Error:", error);
+                showNotification("Ошибка создания компании: " + (error.responseJSON?.message || error.statusText), 'error');
+            }
+        });
+        
+    } catch (error) {
+        console.error('Ошибка создания компании:', error);
+        showNotification('Ошибка создания компании: ' + error.message, 'error');
+    }
+}
+
+// Обработчик создания сервера
+async function handleCreateServer(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const serverName = formData.get('serverName').trim();
+    const selectedCompanyId = document.getElementById('select-company').value;
+    
+    if (!serverName) {
+        showNotification('Введите название сервера', 'error');
+        return;
+    }
+    
+    if (!selectedCompanyId) {
+        showNotification('Сначала выберите компанию', 'error');
+        return;
+    }
+    
+    try {
+        const csrf = await getCsrfToken();
+        
+        const serverData = {
+            companyID: parseInt(selectedCompanyId),
+            serverName: serverName
+        };
+        
+        console.log('Отправляем данные сервера:', serverData);
+        
+        $.ajax({
+            url: "/api/create-server",
+            method: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(serverData),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function(data) {
+                console.log('Сервер создан:', data);
+                showNotification('Сервер успешно создан', 'success');
+                closeModal('server-modal');
+                
+                // Перезагружаем список серверов для выбранной компании
+                setTimeout(() => {
+                    loadServersByCompany(selectedCompanyId);
+                }, 500);
+            },
+            error: function(error) {
+                console.error("Error:", error);
+                showNotification("Ошибка создания сервера: " + (error.responseJSON?.message || error.statusText), 'error');
+            }
+        });
+        
+    } catch (error) {
+        console.error('Ошибка создания сервера:', error);
+        showNotification('Ошибка создания сервера: ' + error.message, 'error');
+    }
 }
 
 // Обработка отправки формы
@@ -218,6 +452,7 @@ async function handleFormSubmit(event) {
                 // Очищаем форму
                 event.target.reset();
                 document.getElementById('select-server').innerHTML = '<option value="" disabled selected>Сначала выберите компанию</option>';
+                document.getElementById('select-contacts').innerHTML = '<option value="" disabled selected>Сначала выберите компанию</option>';
                 
                 // Перенаправляем на страницу с заявками
                 setTimeout(() => {
@@ -233,6 +468,64 @@ async function handleFormSubmit(event) {
     } catch (error) {
         console.error('Ошибка создания заявки:', error);
         showNotification('Ошибка создания заявки: ' + error.message, 'error');
+    }
+}
+
+// Обработчик создания номера телефона
+async function handleCreatePhone(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const phoneNumber = formData.get('phoneNumber').trim();
+    const selectedCompanyId = document.getElementById('select-company').value;
+    
+    if (!phoneNumber) {
+        showNotification('Введите номер телефона', 'error');
+        return;
+    }
+    
+    if (!selectedCompanyId) {
+        showNotification('Сначала выберите компанию', 'error');
+        return;
+    }
+    
+    try {
+        const csrf = await getCsrfToken();
+        
+        const phoneData = {
+            companyID: parseInt(selectedCompanyId),
+            number: phoneNumber
+        };
+        
+        console.log('Отправляем данные номера телефона:', phoneData);
+        
+        $.ajax({
+            url: "/api/create-phoneNumber",
+            method: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(phoneData),
+            headers: { [csrf.headerName]: csrf.token },
+            xhrFields: { withCredentials: true },
+            success: function(data) {
+                console.log('Номер телефона создан:', data);
+                showNotification('Номер телефона успешно создан', 'success');
+                closeModal('phone-modal');
+                
+                // Перезагружаем список номеров телефонов для выбранной компании
+                setTimeout(() => {
+                    loadPhoneNumbersByCompany(selectedCompanyId);
+                }, 500);
+            },
+            error: function(error) {
+                console.error("Error:", error);
+                showNotification("Ошибка создания номера телефона: " + (error.responseJSON?.message || error.statusText), 'error');
+            }
+        });
+        
+    } catch (error) {
+        console.error('Ошибка создания номера телефона:', error);
+        showNotification('Ошибка создания номера телефона: ' + error.message, 'error');
     }
 }
 

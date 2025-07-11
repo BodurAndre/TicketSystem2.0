@@ -2,9 +2,11 @@ package org.example.server.configurations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.server.models.Company;
+import org.example.server.models.PhoneNumber;
 import org.example.server.models.Server;
 import org.example.server.DTO.UserCreateDTO;
 import org.example.server.service.CompanyService;
+import org.example.server.service.PhoneNumberService;
 import org.example.server.service.ServerService;
 import org.example.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +21,14 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     private final CompanyService companyService;
     private final ServerService serverService;
+    private final PhoneNumberService phoneNumberService;
     private final UserService userService;
 
     @Autowired
-    public DatabaseInitializer(CompanyService companyService, ServerService serverService, UserService userService) {
+    public DatabaseInitializer(CompanyService companyService, ServerService serverService, PhoneNumberService phoneNumberService, UserService userService) {
         this.companyService = companyService;
         this.serverService = serverService;
+        this.phoneNumberService = phoneNumberService;
         this.userService = userService;
     }
 
@@ -79,6 +83,25 @@ public class DatabaseInitializer implements CommandLineRunner {
             server4.setCompany(company2);
             server4 = serverService.saveServer(server4);
             log.info("Created server: {} for company: {}", server4.getName(), company2.getName());
+
+            // Создаем номера телефонов для каждой компании
+            PhoneNumber phone1 = new PhoneNumber();
+            phone1.setNumber("+373 22 123456");
+            phone1.setCompany(company1);
+            phone1 = phoneNumberService.savePhoneNumber(phone1);
+            log.info("Created phone number: {} for company: {}", phone1.getNumber(), company1.getName());
+
+            PhoneNumber phone2 = new PhoneNumber();
+            phone2.setNumber("+373 22 654321");
+            phone2.setCompany(company1);
+            phone2 = phoneNumberService.savePhoneNumber(phone2);
+            log.info("Created phone number: {} for company: {}", phone2.getNumber(), company1.getName());
+
+            PhoneNumber phone3 = new PhoneNumber();
+            phone3.setNumber("+373 22 789012");
+            phone3.setCompany(company2);
+            phone3 = phoneNumberService.savePhoneNumber(phone3);
+            log.info("Created phone number: {} for company: {}", phone3.getNumber(), company2.getName());
 
             // Если нет пользователей — создаём админа
             if (userService.countUsers() == 0) {

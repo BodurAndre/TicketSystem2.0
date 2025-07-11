@@ -269,7 +269,7 @@ public class SupportController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Заявка создана");
-            response.put("id", savedRequest != null ? savedRequest.getID() : null);
+            response.put("id", savedRequest != null ? savedRequest.getId() : null);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
@@ -382,6 +382,14 @@ public class SupportController {
     public ResponseEntity<String> reopenRequest(@RequestBody long id) {
         try {
             log.info("ID request", id);
+            
+            // Получаем заявку и очищаем closedByUser
+            Request request = requestService.getRequest(id);
+            if (request != null) {
+                request.setClosedByUser(null);
+                requestService.setRequest(request);
+            }
+            
             requestService.reopenRequest(id);
             return ResponseEntity.status(HttpStatus.CREATED).body("{\"message\": \"Заявка восстановлена\"}");
         } catch (Exception e) {
@@ -584,7 +592,7 @@ public class SupportController {
 
     private RequestListDTO mapToDTO(Request request) {
         RequestListDTO dto = new RequestListDTO();
-        dto.setId(request.getID());
+        dto.setId(request.getId());
         dto.setData(request.getData());
         dto.setTime(request.getTime());
         dto.setTema(request.getTema());

@@ -16,7 +16,7 @@ public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private Long ID;
+    private Long id;
 
     @Column(name = "data")
     private String data;

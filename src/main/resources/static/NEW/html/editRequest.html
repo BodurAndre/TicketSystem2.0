@@ -58,6 +58,18 @@
             <label for="description">Описание:</label>
             <textarea id="description" name="description" required readonly></textarea>
             
+            <!-- Секция комментариев -->
+            <div class="comments-section">
+                <h3><i class="fas fa-comments"></i> Комментарии</h3>
+                <div id="comments-container" class="comments-container">
+                    <!-- Комментарии будут загружаться здесь -->
+                </div>
+                <div class="comment-form">
+                    <textarea id="comment-text" placeholder="Введите комментарий..." rows="3"></textarea>
+                    <button id="send-comment" class="submit-btn">Отправить комментарий</button>
+                </div>
+            </div>
+            
             <div id="edit-buttons"></div>
         </form>
     </div>

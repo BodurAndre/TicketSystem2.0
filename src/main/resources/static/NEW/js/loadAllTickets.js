@@ -1,8 +1,10 @@
 // loadAllTickets.js — точка входа для главной страницы тикетов
 
 let allTickets = [];
+let allCompanies = [];
+let allUsers = [];
 let ticketSort = { field: 'id', asc: false }; // По умолчанию сортируем по ID в убывающем порядке
-let ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL', company: 'ALL', creator: 'ALL', assignee: 'ALL' };
+let ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'TODAY', company: 'ALL', creator: 'ALL', assignee: 'ALL' };
 
 // Функции для работы с localStorage
 function saveFilters() {
@@ -100,13 +102,17 @@ function resetFilters() {
     // Сохраняем сброшенные фильтры
     saveFilters();
     
-    // Перерисовываем таблицу
-    renderFilteredTickets();
+    // Обновляем таблицу с сброшенными фильтрами
+    refreshTable();
 }
 
 export function init() {
     // Загружаем сохраненные фильтры
     loadFilters();
+    
+    // Загружаем все компании и пользователи
+    loadAllCompanies();
+    loadAllUsers();
     
     refreshTable();
     
@@ -132,7 +138,7 @@ export function init() {
             globalSearch.oninput = (e) => { 
                 ticketFilters.search = e.target.value; 
                 saveFilters();
-                renderFilteredTickets(); 
+                refreshTable(); 
             };
         }
         
@@ -141,7 +147,7 @@ export function init() {
             status.onchange = (e) => { 
                 ticketFilters.status = e.target.value; 
                 saveFilters();
-                renderFilteredTickets(); 
+                refreshTable(); 
             };
         }
         
@@ -150,7 +156,7 @@ export function init() {
             priority.onchange = (e) => { 
                 ticketFilters.priority = e.target.value; 
                 saveFilters();
-                renderFilteredTickets(); 
+                refreshTable(); 
             };
         }
         
@@ -159,16 +165,16 @@ export function init() {
             date.onchange = (e) => { 
                 ticketFilters.date = e.target.value; 
                 saveFilters();
-                renderFilteredTickets(); 
+                refreshTable(); 
             };
         }
 
         const company = document.getElementById('filter-company');
-        if (company) company.onchange = (e) => { ticketFilters.company = e.target.value; saveFilters(); renderFilteredTickets(); };
+        if (company) company.onchange = (e) => { ticketFilters.company = e.target.value; saveFilters(); refreshTable(); };
         const creator = document.getElementById('filter-creator');
-        if (creator) creator.onchange = (e) => { ticketFilters.creator = e.target.value; saveFilters(); renderFilteredTickets(); };
+        if (creator) creator.onchange = (e) => { ticketFilters.creator = e.target.value; saveFilters(); refreshTable(); };
         const assignee = document.getElementById('filter-assignee');
-        if (assignee) assignee.onchange = (e) => { ticketFilters.assignee = e.target.value; saveFilters(); renderFilteredTickets(); };
+        if (assignee) assignee.onchange = (e) => { ticketFilters.assignee = e.target.value; saveFilters(); refreshTable(); };
         
         // Добавляем обработчик для кнопки сброса фильтров
         const resetBtn = document.getElementById('reset-filters-btn');
@@ -194,9 +200,21 @@ export function init() {
 }
 
 export async function refreshTable() {
+    const csrf = await getCsrfToken();
+    const filter = {
+        status: ticketFilters.status !== 'ALL' ? ticketFilters.status : null,
+        priority: ticketFilters.priority !== 'ALL' ? ticketFilters.priority : null,
+        date: ticketFilters.date !== 'ALL' ? ticketFilters.date : null,
+        companyId: getCompanyIdByName(ticketFilters.company),
+        assigneeId: getUserIdByName(ticketFilters.assignee),
+        creatorId: getUserIdByName(ticketFilters.creator)
+    };
     $.ajax({
-        url: '/requests',
-        method: 'GET',
+        url: '/requests/filter',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(filter),
+        headers: { [csrf.headerName]: csrf.token },
         success: function(data) {
             allTickets = data;
             fillFilterOptions();
@@ -208,24 +226,31 @@ export async function refreshTable() {
     });
 }
 
+window.refreshTable = refreshTable;
+
 function fillFilterOptions() {
-    // Компании
+    // Компании - используем все загруженные компании
     const companySelect = document.getElementById('filter-company');
     if (companySelect) {
-        const companies = Array.from(new Set(allTickets.map(t => t.company && t.company.name).filter(Boolean)));
-        companySelect.innerHTML = '<option value="ALL">Все компании</option>' + companies.map(c => `<option value="${c}">${c}</option>`).join('');
+        companySelect.innerHTML = '<option value="ALL">Все компании</option>' + 
+            allCompanies.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        companySelect.value = ticketFilters.company;
     }
-    // Создатели
+    
+    // Создатели - используем всех загруженных пользователей
     const creatorSelect = document.getElementById('filter-creator');
     if (creatorSelect) {
-        const creators = Array.from(new Set(allTickets.map(t => t.createUser && (t.createUser.firstName + ' ' + t.createUser.lastName)).filter(Boolean)));
-        creatorSelect.innerHTML = '<option value="ALL">Все</option>' + creators.map(c => `<option value="${c}">${c}</option>`).join('');
+        creatorSelect.innerHTML = '<option value="ALL">Все</option>' + 
+            allUsers.map(u => `<option value="${u.firstName} ${u.lastName}">${u.firstName} ${u.lastName}</option>`).join('');
+        creatorSelect.value = ticketFilters.creator;
     }
-    // Исполнители
+    
+    // Исполнители - используем всех загруженных пользователей
     const assigneeSelect = document.getElementById('filter-assignee');
     if (assigneeSelect) {
-        const assignees = Array.from(new Set(allTickets.map(t => t.assigneeUser && (t.assigneeUser.firstName + ' ' + t.assigneeUser.lastName)).filter(Boolean)));
-        assigneeSelect.innerHTML = '<option value="ALL">Все</option>' + assignees.map(a => `<option value="${a}">${a}</option>`).join('');
+        assigneeSelect.innerHTML = '<option value="ALL">Все</option>' + 
+            allUsers.map(u => `<option value="${u.firstName} ${u.lastName}">${u.firstName} ${u.lastName}</option>`).join('');
+        assigneeSelect.value = ticketFilters.assignee;
     }
 }
 
@@ -532,4 +557,48 @@ async function getCsrfToken() {
             console.error("Error fetching CSRF token");
             throw new Error("CSRF token error");
         });
+}
+
+// Вспомогательные функции для поиска id по имени
+function getCompanyIdByName(name) {
+    if (!name || name === 'ALL') return null;
+    const company = allCompanies.find(c => c.name === name);
+    return company ? company.id : null;
+}
+
+function getUserIdByName(name) {
+    if (!name || name === 'ALL') return null;
+    const user = allUsers.find(u => (u.firstName + ' ' + u.lastName) === name);
+    return user ? user.id : null;
+}
+
+// Функции для загрузки всех компаний и пользователей
+async function loadAllCompanies() {
+    const csrf = await getCsrfToken();
+    $.ajax({
+        url: '/api/companies',
+        method: 'GET',
+        headers: { [csrf.headerName]: csrf.token },
+        success: function(data) {
+            allCompanies = data;
+        },
+        error: function (xhr, status, error) {
+            console.error("Ошибка при загрузке компаний: ", error);
+        }
+    });
+}
+
+async function loadAllUsers() {
+    const csrf = await getCsrfToken();
+    $.ajax({
+        url: '/api/users/all',
+        method: 'GET',
+        headers: { [csrf.headerName]: csrf.token },
+        success: function(data) {
+            allUsers = data;
+        },
+        error: function (xhr, status, error) {
+            console.error("Ошибка при загрузке пользователей: ", error);
+        }
+    });
 }

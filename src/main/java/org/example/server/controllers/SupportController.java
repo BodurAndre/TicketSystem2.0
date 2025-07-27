@@ -6,6 +6,7 @@ import org.example.server.DTO.RequestDTO;
 import org.example.server.DTO.RequestListDTO;
 import org.example.server.DTO.RequestUpdateDTO;
 import org.example.server.DTO.ServerDTO;
+import org.example.server.DTO.FilterRequestDTO;
 import org.example.server.models.Company;
 import org.example.server.models.Request;
 import org.example.server.models.Server;
@@ -588,6 +589,21 @@ public class SupportController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"message\": \"Test endpoint error\"}");
         }
+    }
+
+    @PostMapping(value = "/requests/filter", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> filterRequests(@RequestBody FilterRequestDTO filter) {
+        List<Request> filtered = requestService.filterRequests(
+            filter.getStatus(),
+            filter.getPriority(),
+            filter.getCompanyId(),
+            filter.getAssigneeId(),
+            filter.getCreatorId(),
+            filter.getDate()
+        );
+        List<RequestListDTO> dtoList = filtered.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(dtoList);
     }
 
     private RequestListDTO mapToDTO(Request request) {

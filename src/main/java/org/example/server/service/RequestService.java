@@ -9,6 +9,8 @@ import org.example.server.repositories.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,5 +99,44 @@ public class RequestService {
     public List<Request> getCloseRequestsByCreatorEmail(String email) {
         List<Request> requests =  requestRepository.findByStatusAndCreateUser_Email("CLOSED", email);
         return requests.isEmpty() ? new ArrayList<>() : requests;
+    }
+
+    public List<Request> filterRequests(String status, String priority, Long companyId, Long assigneeId, Long creatorId, String date) {
+        // Обработка относительных дат
+        String processedDate = null;
+        if (date != null && !date.equals("ALL")) {
+            LocalDate today = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            
+            switch (date) {
+                case "TODAY":
+                    processedDate = today.format(formatter);
+                    break;
+                case "YESTERDAY":
+                    processedDate = today.minusDays(1).format(formatter);
+                    break;
+                case "WEEK":
+                    // Для недели пока не фильтруем по дате, возвращаем все
+                    processedDate = null;
+                    break;
+                case "MONTH":
+                    // Для месяца пока не фильтруем по дате, возвращаем все
+                    processedDate = null;
+                    break;
+                default:
+                    // Если это конкретная дата в формате dd.MM.yyyy, используем как есть
+                    processedDate = date;
+                    break;
+            }
+        }
+        
+        return requestRepository.filterRequests(
+            status != null && !status.equals("ALL") ? status : null,
+            priority != null && !priority.equals("ALL") ? priority : null,
+            companyId != null && companyId != -1 ? companyId : null,
+            assigneeId != null && assigneeId != -1 ? assigneeId : null,
+            creatorId != null && creatorId != -1 ? creatorId : null,
+            processedDate
+        );
     }
 }

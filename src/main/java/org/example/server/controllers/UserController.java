@@ -61,6 +61,12 @@ public class UserController {
         return userService.getAllUsersWithoutCurrentUser(username);
     }
 
+    @GetMapping(value = "/api/users/all", produces = "application/json")
+    @ResponseBody
+    public List<User> getAllUsersForFilters() {
+        return userService.getAllUsers();
+    }
+
     @GetMapping(value = "/getUser/{id}", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> getRequest(@PathVariable long id) {

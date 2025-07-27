@@ -43,9 +43,11 @@
             </div>
             <div class="input-group">
                 <div class="input-item">
-                    <label for="contacts">Контакты:</label>
+                    <label for="select-contacts">Контакты:</label>
                     <div class="select-with-button">
-                        <input type="text" id="contacts" name="contacts" placeholder="Введите контакты" required>
+                        <select id="select-contacts" name="contacts" required>
+                            <option value="" disabled selected>Выберите номер телефона</option>
+                        </select>
                         <button type="button" id="add-phone-btn" class="add-btn" title="Добавить новый номер телефона" disabled>
                             <i class="fas fa-plus"></i>
                         </button>

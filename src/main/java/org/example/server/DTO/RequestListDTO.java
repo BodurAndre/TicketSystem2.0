@@ -20,6 +20,7 @@ public class RequestListDTO {
 
     @Data
     public static class UserListDTO {
+        private Long id;
         private String email;
         private String firstName;
         private String lastName;

@@ -620,6 +620,7 @@ public class SupportController {
         // createUser
         RequestListDTO.UserListDTO createUser = new RequestListDTO.UserListDTO();
         if(request.getCreateUser()!=null){
+            createUser.setId(request.getCreateUser().getId());
             createUser.setEmail(request.getCreateUser().getEmail());
             createUser.setFirstName(request.getCreateUser().getFirstName());
             createUser.setLastName(request.getCreateUser().getLastName());
@@ -630,6 +631,7 @@ public class SupportController {
         // assigneeUser
         RequestListDTO.UserListDTO assigneeUser = new RequestListDTO.UserListDTO();
         if(request.getAssigneeUser()!=null){
+            assigneeUser.setId(request.getAssigneeUser().getId());
             assigneeUser.setEmail(request.getAssigneeUser().getEmail());
             assigneeUser.setFirstName(request.getAssigneeUser().getFirstName());
             assigneeUser.setLastName(request.getAssigneeUser().getLastName());
@@ -640,6 +642,7 @@ public class SupportController {
         // closedByUser
         RequestListDTO.UserListDTO closedByUser = new RequestListDTO.UserListDTO();
         if(request.getClosedByUser()!=null){
+            closedByUser.setId(request.getClosedByUser().getId());
             closedByUser.setEmail(request.getClosedByUser().getEmail());
             closedByUser.setFirstName(request.getClosedByUser().getFirstName());
             closedByUser.setLastName(request.getClosedByUser().getLastName());

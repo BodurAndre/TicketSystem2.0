@@ -105,6 +105,7 @@ async function loadTicketData(id) {
         }
         if (!response.ok) throw new Error("Ошибка при загрузке данных");
         const data = await response.json();
+        console.log(data);
         // Заполняем поля
         document.getElementById("tema").value = data.tema;
         document.getElementById("priority").value = data.priority;

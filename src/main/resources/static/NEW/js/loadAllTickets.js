@@ -2,7 +2,7 @@
 
 let allTickets = [];
 let ticketSort = { field: 'id', asc: false }; // По умолчанию сортируем по ID в убывающем порядке
-let ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL' };
+let ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL', company: 'ALL', creator: 'ALL', assignee: 'ALL' };
 
 // Функции для работы с localStorage
 function saveFilters() {
@@ -47,10 +47,17 @@ function applySavedFilters() {
     if (date && ticketFilters.date) {
         date.value = ticketFilters.date;
     }
+
+    const company = document.getElementById('filter-company');
+    if (company && ticketFilters.company) company.value = ticketFilters.company;
+    const creator = document.getElementById('filter-creator');
+    if (creator && ticketFilters.creator) creator.value = ticketFilters.creator;
+    const assignee = document.getElementById('filter-assignee');
+    if (assignee && ticketFilters.assignee) assignee.value = ticketFilters.assignee;
 }
 
 function resetFilters() {
-    ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL' };
+    ticketFilters = { search: '', status: 'ALL', priority: 'ALL', date: 'ALL', company: 'ALL', creator: 'ALL', assignee: 'ALL' };
     ticketSort = { field: 'id', asc: false }; // Сбрасываем к сортировке по ID в убывающем порядке
     
     // Очищаем поля формы
@@ -73,6 +80,13 @@ function resetFilters() {
     if (date) {
         date.value = 'ALL';
     }
+
+    const company = document.getElementById('filter-company');
+    if (company) company.value = 'ALL';
+    const creator = document.getElementById('filter-creator');
+    if (creator) creator.value = 'ALL';
+    const assignee = document.getElementById('filter-assignee');
+    if (assignee) assignee.value = 'ALL';
     
     // Очищаем стрелки сортировки
     document.querySelectorAll('.sort-arrow').forEach(el => el.innerHTML = '');
@@ -148,6 +162,13 @@ export function init() {
                 renderFilteredTickets(); 
             };
         }
+
+        const company = document.getElementById('filter-company');
+        if (company) company.onchange = (e) => { ticketFilters.company = e.target.value; saveFilters(); renderFilteredTickets(); };
+        const creator = document.getElementById('filter-creator');
+        if (creator) creator.onchange = (e) => { ticketFilters.creator = e.target.value; saveFilters(); renderFilteredTickets(); };
+        const assignee = document.getElementById('filter-assignee');
+        if (assignee) assignee.onchange = (e) => { ticketFilters.assignee = e.target.value; saveFilters(); renderFilteredTickets(); };
         
         // Добавляем обработчик для кнопки сброса фильтров
         const resetBtn = document.getElementById('reset-filters-btn');
@@ -178,12 +199,34 @@ export async function refreshTable() {
         method: 'GET',
         success: function(data) {
             allTickets = data;
+            fillFilterOptions();
             renderFilteredTickets();
         },
         error: function (xhr, status, error) {
             console.error("Ошибка при загрузке данных: ", error);
         }
     });
+}
+
+function fillFilterOptions() {
+    // Компании
+    const companySelect = document.getElementById('filter-company');
+    if (companySelect) {
+        const companies = Array.from(new Set(allTickets.map(t => t.company && t.company.name).filter(Boolean)));
+        companySelect.innerHTML = '<option value="ALL">Все компании</option>' + companies.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+    // Создатели
+    const creatorSelect = document.getElementById('filter-creator');
+    if (creatorSelect) {
+        const creators = Array.from(new Set(allTickets.map(t => t.createUser && (t.createUser.firstName + ' ' + t.createUser.lastName)).filter(Boolean)));
+        creatorSelect.innerHTML = '<option value="ALL">Все</option>' + creators.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+    // Исполнители
+    const assigneeSelect = document.getElementById('filter-assignee');
+    if (assigneeSelect) {
+        const assignees = Array.from(new Set(allTickets.map(t => t.assigneeUser && (t.assigneeUser.firstName + ' ' + t.assigneeUser.lastName)).filter(Boolean)));
+        assigneeSelect.innerHTML = '<option value="ALL">Все</option>' + assignees.map(a => `<option value="${a}">${a}</option>`).join('');
+    }
 }
 
 function renderFilteredTickets() {
@@ -194,12 +237,17 @@ function renderFilteredTickets() {
             match = (
                 (ticket.tema && ticket.tema.toLowerCase().includes(search)) ||
                 (ticket.description && ticket.description.toLowerCase().includes(search)) ||
-                (ticket.createUser && ((ticket.createUser.firstName + ' ' + ticket.createUser.lastName).toLowerCase().includes(search)))
+                (ticket.createUser && ((ticket.createUser.firstName + ' ' + ticket.createUser.lastName).toLowerCase().includes(search))) ||
+                (ticket.company && ticket.company.name && ticket.company.name.toLowerCase().includes(search)) ||
+                (ticket.assigneeUser && ((ticket.assigneeUser.firstName + ' ' + ticket.assigneeUser.lastName).toLowerCase().includes(search)))
             );
         }
         if (ticketFilters.status !== 'ALL' && String(ticket.status).toUpperCase() !== ticketFilters.status) return false;
         if (ticketFilters.priority !== 'ALL' && String(ticket.priority).toUpperCase() !== ticketFilters.priority) return false;
         if (ticketFilters.date !== 'ALL' && !isDateMatch(ticket.data)) return false;
+        if (ticketFilters.company !== 'ALL' && (!ticket.company || ticket.company.name !== ticketFilters.company)) return false;
+        if (ticketFilters.creator !== 'ALL' && (!ticket.createUser || (ticket.createUser.firstName + ' ' + ticket.createUser.lastName) !== ticketFilters.creator)) return false;
+        if (ticketFilters.assignee !== 'ALL' && (!ticket.assigneeUser || (ticket.assigneeUser.firstName + ' ' + ticket.assigneeUser.lastName) !== ticketFilters.assignee)) return false;
         return match;
     });
     

@@ -166,41 +166,23 @@ async function loadServersByCompany(companyId) {
 }
 
 // Загрузка номеров телефонов по выбранной компании
-async function loadPhoneNumbersByCompany(companyId) {
+async function loadPhoneNumbersByCompany(companyId, selectedNumber = null) {
     try {
         console.log('Загружаем номера телефонов для компании:', companyId);
         const response = await fetch(`/api/phoneNumbers/${companyId}`);
-        console.log('Ответ от сервера:', response.status, response.statusText);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Ошибка ответа:', errorText);
-            throw new Error(`Ошибка загрузки номеров телефонов: ${response.status} ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error('Ошибка загрузки номеров телефонов');
         const phoneNumbers = await response.json();
-        console.log('Полученные номера телефонов:', phoneNumbers);
-        
         const contactsSelect = document.getElementById('select-contacts');
-        if (!contactsSelect) {
-            console.error('Элемент select-contacts не найден');
-            return;
-        }
-        
-        // Очищаем существующие опции
+        if (!contactsSelect) return;
         contactsSelect.innerHTML = '<option value="" disabled selected>Выберите номер телефона</option>';
-        
-        // Добавляем номера телефонов
         phoneNumbers.forEach(phone => {
             const option = document.createElement('option');
             option.value = phone.number;
             option.textContent = phone.number;
+            if (selectedNumber && phone.number === selectedNumber) option.selected = true;
             contactsSelect.appendChild(option);
         });
-        
-        console.log('Номера телефонов загружены успешно');
     } catch (error) {
-        console.error('Ошибка загрузки номеров телефонов:', error);
         showNotification('Ошибка загрузки списка номеров телефонов: ' + error.message, 'error');
     }
 }
@@ -489,7 +471,7 @@ async function handleFormSubmit(event) {
         priority: formData.get('priority'),
         companyId: parseInt(formData.get('companyId')),
         serverId: parseInt(formData.get('serverId')),
-        contacts: formData.get('contacts'),
+        contacts: document.getElementById('select-contacts').value,
         assigneeUserId: assigneeUserId ? parseInt(assigneeUserId) : null,
         description: formData.get('description'),
         status: 'OPEN'
@@ -577,7 +559,7 @@ async function handleCreatePhone(event) {
                 
                 // Перезагружаем список номеров телефонов для выбранной компании
                 setTimeout(() => {
-                    loadPhoneNumbersByCompany(selectedCompanyId);
+                    loadPhoneNumbersByCompany(selectedCompanyId, phoneNumber); // обновить select и выбрать новый
                 }, 500);
             },
             error: function(error) {

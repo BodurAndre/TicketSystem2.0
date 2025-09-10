@@ -116,18 +116,18 @@ public class DatabaseInitializer implements CommandLineRunner {
             User admin = null;
             if (userService.countUsers() == 0) {
                 UserCreateDTO adminDTO = new UserCreateDTO();
-                adminDTO.setEmail("bodur20@mail.ru");
+                adminDTO.setEmail("admin@git.com");
                 adminDTO.setFirstName("Bodur");
-                adminDTO.setLastName("Admin");
+                adminDTO.setLastName("Andrei");
                 adminDTO.setRole("ADMIN");
-                adminDTO.setCountry("RU");
-                adminDTO.setDateOfBirth("1990-01-01");
+                adminDTO.setCountry("MD");
+                adminDTO.setDateOfBirth("2000-05-04");
                 adminDTO.setGender("MALE");
-                userService.createUser(adminDTO, "1");
-                admin = userService.getUserByEmail("bodur20@mail.ru");
-                log.info("Создан админ: bodur20@mail.ru / 1");
+                userService.createUser(adminDTO, "12345");
+                admin = userService.getUserByEmail("admin@git.com\"");
+                log.info("Создан админ: admin@git.com");
             } else {
-                admin = userService.getUserByEmail("bodur20@mail.ru");
+                admin = userService.getUserByEmail("admin@git.com\"");
             }
 
             // Создаем тестовые заявки с разными датами

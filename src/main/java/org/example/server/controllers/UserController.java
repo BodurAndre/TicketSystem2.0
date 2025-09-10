@@ -36,20 +36,12 @@ public class UserController {
     @GetMapping(value = "/getUsers", produces = "application/json")
     @ResponseBody
     public List<User> getAllUsers() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-        return userService.getAllUsersWithoutCurrentUser(username);
+        return userService.getAllUsers();
     }
 
     @GetMapping(value = "/api/users", produces = "application/json")
     @ResponseBody
-    public List<User> getApiUsers() {
+    public List<User> getAllUsersWithoutCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
 

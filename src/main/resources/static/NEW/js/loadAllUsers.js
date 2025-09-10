@@ -32,7 +32,7 @@ export function init() {
 
 export function refreshTable() {
     $.ajax({
-        url: '/getUsers',
+        url: '/api/users',
         method: 'GET',
         success: function(data) {
             allUsers = data;

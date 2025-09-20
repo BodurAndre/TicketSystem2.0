@@ -20,4 +20,5 @@ public class CommentDTO {
     private LocalDateTime createdAt;
     private Boolean isSystem;
     private List<String> changeDetails;
-} 
+    private List<CommentFileDTO> files;
+}

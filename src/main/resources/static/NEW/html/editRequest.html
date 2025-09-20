@@ -67,10 +67,62 @@
                 </div>
                 <div class="comment-form">
                     <textarea id="comment-text" placeholder="Введите комментарий..." rows="3"></textarea>
+                    
+                    <!-- Форма для загрузки файлов -->
+                    <div class="file-upload-section">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="comment-files" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar">
+                            <label for="comment-files" class="file-input-label">
+                                <i class="fas fa-paperclip"></i> Прикрепить файлы
+                            </label>
+                        </div>
+                        <div id="selected-files" class="selected-files"></div>
+                    </div>
+                    
                     <button id="send-comment" class="submit-btn">Отправить комментарий</button>
                 </div>
             </div>
             
         </form>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра изображений -->
+<div id="image-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeImageModal()">&times;</span>
+        <img id="modal-image" src="" alt="Изображение">
+        <button class="download-btn" id="image-download-btn" onclick="downloadImage()">
+            <i class="fas fa-download"></i> Скачать
+        </button>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра видео -->
+<div id="video-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeVideoModal()">&times;</span>
+        <video id="modal-video" controls>
+            <source src="" type="">
+            Ваш браузер не поддерживает воспроизведение видео.
+        </video>
+        <button class="download-btn" id="video-download-btn" onclick="downloadVideo()">
+            <i class="fas fa-download"></i> Скачать
+        </button>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра документов -->
+<div id="document-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeDocumentModal()">&times;</span>
+        <div id="document-preview" class="document-preview">
+            <i id="document-icon" class="fas fa-file" style="font-size: 64px; color: #6c757d; margin-bottom: 20px;"></i>
+            <h3 id="document-name" style="color: white; margin-bottom: 10px;"></h3>
+            <p id="document-size" style="color: #ccc; margin-bottom: 20px;"></p>
+        </div>
+        <button class="download-btn" id="document-download-btn" onclick="downloadDocument()">
+            <i class="fas fa-download"></i> Скачать файл
+        </button>
     </div>
 </div>

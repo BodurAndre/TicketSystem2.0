@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "comments")
@@ -38,4 +39,7 @@ public class Comment {
 
     @Column(name = "change_details", columnDefinition = "TEXT")
     private String changeDetails;
-} 
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CommentFile> files;
+}

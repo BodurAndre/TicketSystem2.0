@@ -171,16 +171,8 @@ async function loadTicketData(id) {
         // Загружаем комментарии
         await loadComments(requestId);
         
-        // Добавляем обработчик для кнопки отправки комментария
-        document.getElementById('send-comment').addEventListener('click', sendComment);
-        
-        // Добавляем обработчик Enter для отправки комментария
-        document.getElementById('comment-text').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                e.preventDefault();
-                sendComment();
-            }
-        });
+        // Инициализируем обработчики файлов (включая кнопку отправки)
+        initFileHandlers();
 
         // Сохраняем исходные данные заявки
         originalRequestData = { ...data };
@@ -562,6 +554,15 @@ function createCommentElement(comment) {
         minute: '2-digit'
     });
     
+    let filesHtml = '';
+    if (comment.files && comment.files.length > 0) {
+        filesHtml = '<div class="comment-files">';
+        comment.files.forEach(file => {
+            filesHtml += createFileElement(file);
+        });
+        filesHtml += '</div>';
+    }
+    
     if (comment.isSystem) {
         let detailsHtml = '';
         if (comment.changeDetails) {
@@ -575,6 +576,7 @@ function createCommentElement(comment) {
         commentDiv.innerHTML = `
             <div class="comment-text">${escapeHtml(comment.text)}</div>
             ${detailsHtml}
+            ${filesHtml}
             <div class="comment-date" style="text-align: right; margin-top: 5px; font-size: 11px;">${date}</div>
         `;
     } else {
@@ -584,6 +586,7 @@ function createCommentElement(comment) {
                 <span class="comment-date">${date}</span>
             </div>
             <div class="comment-text">${escapeHtml(comment.text)}</div>
+            ${filesHtml}
         `;
     }
     
@@ -731,3 +734,380 @@ window.refreshRequestData = async function () {
         await loadTicketData(id);
     }
 };
+
+// === ФУНКЦИИ ДЛЯ РАБОТЫ С ФАЙЛАМИ ===
+
+// Переменные для работы с файлами
+let selectedFiles = [];
+
+// Инициализация обработчиков для файлов
+function initFileHandlers() {
+    const fileInput = document.getElementById('comment-files');
+    const sendButton = document.getElementById('send-comment');
+    const commentText = document.getElementById('comment-text');
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelection);
+    }
+    
+    if (sendButton) {
+        // Удаляем все предыдущие обработчики
+        sendButton.removeEventListener('click', sendComment);
+        sendButton.removeEventListener('click', handleSendComment);
+        // Добавляем новый обработчик
+        sendButton.addEventListener('click', handleSendComment);
+    }
+    
+    if (commentText) {
+        // Удаляем предыдущий обработчик Enter
+        commentText.removeEventListener('keydown', handleEnterKey);
+        // Добавляем новый обработчик Enter
+        commentText.addEventListener('keydown', handleEnterKey);
+    }
+}
+
+// Обработчик клавиши Enter
+function handleEnterKey(e) {
+    if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        handleSendComment(e);
+    }
+}
+
+// Обработка выбора файлов
+function handleFileSelection(event) {
+    const files = Array.from(event.target.files);
+    selectedFiles = files;
+    displaySelectedFiles();
+}
+
+// Отображение выбранных файлов
+function displaySelectedFiles() {
+    const container = document.getElementById('selected-files');
+    container.innerHTML = '';
+    
+    selectedFiles.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        const fileIcon = getFileIcon(file.type);
+        const fileSize = formatFileSize(file.size);
+        
+        fileItem.innerHTML = `
+            <div class="file-info">
+                <i class="file-icon ${fileIcon}"></i>
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">(${fileSize})</span>
+            </div>
+            <button type="button" class="remove-file" onclick="removeFile(${index})">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(fileItem);
+    });
+}
+
+// Удаление файла из списка
+function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    displaySelectedFiles();
+    
+    // Обновляем input
+    const fileInput = document.getElementById('comment-files');
+    if (selectedFiles.length === 0) {
+        fileInput.value = '';
+    }
+}
+
+// Получение иконки для типа файла
+function getFileIcon(mimeType) {
+    if (mimeType.startsWith('image/')) {
+        return 'fas fa-image';
+    } else if (mimeType.startsWith('video/')) {
+        return 'fas fa-video';
+    } else if (mimeType.includes('pdf')) {
+        return 'fas fa-file-pdf';
+    } else if (mimeType.includes('word') || mimeType.includes('document')) {
+        return 'fas fa-file-word';
+    } else if (mimeType.includes('zip') || mimeType.includes('rar')) {
+        return 'fas fa-file-archive';
+    } else {
+        return 'fas fa-file';
+    }
+}
+
+// Форматирование размера файла
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Б';
+    const k = 1024;
+    const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Обработка отправки комментария с файлами
+async function handleSendComment(event) {
+    event.preventDefault();
+    
+    const textArea = document.getElementById('comment-text');
+    const text = textArea.value.trim();
+    
+    if (!text && selectedFiles.length === 0) {
+        showNotification('Введите текст комментария или прикрепите файлы', 'warning');
+        return;
+    }
+    
+    if (!requestId) {
+        showNotification('Ошибка: не найден ID заявки', 'error');
+        return;
+    }
+    
+    try {
+        // Получаем CSRF токен
+        const csrf = await getCsrfToken();
+        
+        const formData = new FormData();
+        formData.append('text', text || '');
+        formData.append('requestId', requestId);
+        formData.append('isSystem', false);
+        formData.append('_csrf', csrf.token); // Добавляем CSRF токен в FormData
+        
+        // Добавляем файлы
+        selectedFiles.forEach(file => {
+            formData.append('files', file);
+        });
+        
+        const response = await fetch('/api/comments/with-files', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            textArea.value = '';
+            selectedFiles = [];
+            displaySelectedFiles();
+            document.getElementById('comment-files').value = '';
+            
+            // Перезагружаем комментарии
+            await loadComments(requestId);
+            showNotification('Комментарий добавлен', 'success');
+        } else {
+            const errorData = await response.json();
+            showNotification(errorData.message || 'Ошибка при отправке комментария', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка при отправке комментария:', error);
+        showNotification('Ошибка при отправке комментария', 'error');
+    }
+}
+
+// Создание элемента файла
+function createFileElement(file) {
+    const fileType = file.fileType;
+    
+    if (fileType === 'IMAGE') {
+        return `
+            <div class="comment-file image" onclick="openImageModal(${file.id}, '${file.fileName}')">
+                <img src="/api/files/${file.id}/view" alt="${file.fileName}" class="comment-file-thumbnail" loading="lazy">
+            </div>
+        `;
+    } else if (fileType === 'VIDEO') {
+        return `
+            <div class="comment-file video" onclick="openVideoModal(${file.id}, '${file.fileName}')">
+                <video class="comment-file-thumbnail" muted preload="metadata">
+                    <source src="/api/files/${file.id}/view" type="${file.contentType}">
+                </video>
+                <div class="video-overlay">
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
+        `;
+    } else {
+        const fileIcon = getFileIcon(file.contentType);
+        const fileSize = formatFileSize(file.fileSize);
+        
+        return `
+            <div class="comment-file document" onclick="openDocumentModal(${file.id}, '${file.fileName}', '${file.contentType}', ${file.fileSize})">
+                <div class="file-icon">
+                    <i class="${fileIcon}"></i>
+                </div>
+                <div class="file-info">
+                    <div class="file-name">${file.fileName}</div>
+                    <div class="file-size">${fileSize}</div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Переменные для хранения текущего файла
+let currentFileId = null;
+let currentFileName = null;
+
+// Модальные окна для просмотра медиа
+window.openImageModal = function(fileId, fileName) {
+    console.log('Opening image modal:', fileId, fileName);
+    currentFileId = fileId;
+    currentFileName = fileName;
+    
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('modal-image');
+    
+    if (!modal) {
+        console.error('Image modal not found');
+        return;
+    }
+    
+    if (!img) {
+        console.error('Modal image element not found');
+        return;
+    }
+    
+    img.src = `/api/files/${fileId}/view`;
+    modal.style.display = 'flex';
+    
+    console.log('Modal displayed, image src set to:', img.src);
+    
+    // Закрытие по клику вне изображения
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeImageModal();
+        }
+    };
+}
+
+window.closeImageModal = function() {
+    const modal = document.getElementById('image-modal');
+    modal.style.display = 'none';
+    currentFileId = null;
+    currentFileName = null;
+}
+
+window.openVideoModal = function(fileId, fileName) {
+    currentFileId = fileId;
+    currentFileName = fileName;
+    
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('modal-video');
+    const source = video.querySelector('source');
+    
+    source.src = `/api/files/${fileId}/view`;
+    video.load(); // Перезагружаем видео
+    modal.style.display = 'flex';
+    
+    // Закрытие по клику вне видео
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeVideoModal();
+        }
+    };
+}
+
+window.closeVideoModal = function() {
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('modal-video');
+    
+    video.pause();
+    video.currentTime = 0;
+    modal.style.display = 'none';
+    currentFileId = null;
+    currentFileName = null;
+}
+
+window.openDocumentModal = function(fileId, fileName, contentType, fileSize) {
+    console.log('Opening document modal:', fileId, fileName, contentType, fileSize);
+    currentFileId = fileId;
+    currentFileName = fileName;
+    
+    const modal = document.getElementById('document-modal');
+    const icon = document.getElementById('document-icon');
+    const name = document.getElementById('document-name');
+    const size = document.getElementById('document-size');
+    
+    if (!modal) {
+        console.error('Document modal not found');
+        return;
+    }
+    
+    // Устанавливаем иконку в зависимости от типа файла
+    const fileIcon = getFileIcon(contentType);
+    if (icon) icon.className = fileIcon;
+    
+    if (name) name.textContent = fileName;
+    if (size) size.textContent = formatFileSize(fileSize);
+    
+    modal.style.display = 'flex';
+    
+    console.log('Document modal displayed');
+    
+    // Закрытие по клику вне модального окна
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeDocumentModal();
+        }
+    };
+}
+
+window.closeDocumentModal = function() {
+    const modal = document.getElementById('document-modal');
+    modal.style.display = 'none';
+    currentFileId = null;
+    currentFileName = null;
+}
+
+// Функции скачивания
+window.downloadImage = function() {
+    console.log('Download image called:', currentFileId, currentFileName);
+    if (currentFileId && currentFileName) {
+        // Создаем временную ссылку для скачивания
+        const link = document.createElement('a');
+        link.href = `/api/files/${currentFileId}`;
+        link.download = currentFileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        console.log('Download started for:', currentFileName);
+    } else {
+        console.error('No file ID or name available');
+    }
+}
+
+window.downloadVideo = function() {
+    if (currentFileId && currentFileName) {
+        // Создаем временную ссылку для скачивания
+        const link = document.createElement('a');
+        link.href = `/api/files/${currentFileId}`;
+        link.download = currentFileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+window.downloadDocument = function() {
+    if (currentFileId && currentFileName) {
+        // Создаем временную ссылку для скачивания
+        const link = document.createElement('a');
+        link.href = `/api/files/${currentFileId}`;
+        link.download = currentFileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// Закрытие модальных окон по клавише Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeImageModal();
+        closeVideoModal();
+        closeDocumentModal();
+    }
+});
+
+// Инициализация обработчиков файлов при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация будет вызвана из loadTicketData()
+});

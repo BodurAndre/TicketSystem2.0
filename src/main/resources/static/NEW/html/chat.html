@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат - Ticket System</title>
+    <link rel="stylesheet" href="/NEW/css/chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Боковая панель с собеседниками -->
+        <div class="chat-sidebar">
+            <div class="chat-header">
+                <h2><i class="fas fa-users"></i> Пользователи</h2>
+                <button id="new-chat-btn" class="new-chat-btn" onclick="openUserSelectModal()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            
+            <div id="users-list" class="users-list">
+                <!-- Список пользователей будет загружен здесь -->
+            </div>
+        </div>
+
+        <!-- Основная область чата -->
+        <div class="chat-main">
+            <div id="chat-welcome" class="chat-welcome">
+                <div class="welcome-content">
+                    <i class="fas fa-comments"></i>
+                    <h3>Выберите собеседника</h3>
+                    <p>Начните общение, выбрав пользователя из списка слева</p>
+                </div>
+            </div>
+
+            <div id="chat-area" class="chat-area">
+                <div class="chat-header">
+                    <div class="chat-partner-info">
+                        <div class="partner-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="partner-details">
+                            <h3 id="partner-name">Имя собеседника</h3>
+                            <span id="partner-status" class="status">онлайн</span>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button id="mark-read-btn" class="action-btn" title="Отметить как прочитанное">
+                            <i class="fas fa-check-double"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="messages-container" class="messages-container">
+                    <!-- Сообщения будут загружены здесь -->
+                </div>
+
+                <div class="message-input-container">
+                    <div class="input-wrapper">
+                        <textarea id="message-input" placeholder="Введите сообщение..." rows="1"></textarea>
+                        <button id="send-btn" class="send-btn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для выбора пользователя -->
+    <div id="user-select-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Выберите пользователя для чата</h3>
+                <button class="modal-close" onclick="closeUserSelectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-users-list" class="modal-users-list">
+                    <!-- Список всех пользователей будет загружен здесь -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/NEW/js/chat.js"></script>
+</body>
+</html>

@@ -77,6 +77,32 @@ body {
     gap: 10px;
 }
 
+/* Мобильная адаптация для верхнего меню */
+@media (max-width: 768px) {
+    .user-actions {
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .user-action-btn {
+        padding: 6px 10px;
+        font-size: 0.8em;
+        min-width: auto;
+    }
+    
+    .user-action-btn span {
+        display: none; /* Скрываем текст на мобильных, оставляем только иконки */
+    }
+    
+    .header-container {
+        padding: 0 10px;
+    }
+    
+    .logo-section span {
+        display: none; /* Скрываем текст логотипа на мобильных */
+    }
+}
+
 .user-action-btn {
     color: #fff;
     text-decoration: none;

@@ -252,4 +252,41 @@ public class UserController {
 
         return password.toString();
     }
+
+    @GetMapping(value = "/api/user/current", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> getCurrentUserInfo() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userEmail = authentication.getName();
+            
+            User currentUser = userService.getUserByEmail(userEmail);
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("{\"message\": \"Пользователь не найден\"}");
+            }
+            
+            return ResponseEntity.ok(currentUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при получении данных пользователя\"}");
+        }
+    }
+
+    @GetMapping(value = "/api/users/{id}", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        try {
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("{\"message\": \"Пользователь не найден\"}");
+            }
+            
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при получении данных пользователя\"}");
+        }
+    }
 }

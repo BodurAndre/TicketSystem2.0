@@ -20,6 +20,8 @@ function route() {
         loadPageMyAccount();
     } else if (hash === 'statistics') {
         loadPageStatistics();
+    } else if (hash === 'chat') {
+        loadPageChat();
     } else {
         loadPage(hash);
     }
@@ -346,3 +348,35 @@ window.initMyAccount = async function() {
     // По умолчанию показываем персональные данные
     personalBtn.click();
 };
+
+// Функция загрузки страницы чата
+async function loadPageChat() {
+    try {
+        // Загружаем CSS для чата
+        await loadCSS('/NEW/css/chat.css');
+        
+        // Загружаем HTML чата
+        const response = await fetch('/NEW/html/chat.html');
+        const html = await response.text();
+        
+        // Вставляем HTML в контейнер приложения
+        const app = document.getElementById('app');
+        app.innerHTML = html;
+        
+        // Загружаем JavaScript для чата
+        const script = document.createElement('script');
+        script.src = '/NEW/js/chat.js';
+        script.onload = () => {
+            console.log('Chat script loaded successfully');
+            console.log('📊 document.readyState после загрузки скрипта:', document.readyState);
+        };
+        script.onerror = (error) => {
+            console.error('❌ Ошибка загрузки скрипта chat.js:', error);
+        };
+        document.head.appendChild(script);
+        
+    } catch (error) {
+        console.error('Ошибка загрузки чата:', error);
+        document.getElementById('app').innerHTML = '<div style="color:red;text-align:center;">Ошибка загрузки чата</div>';
+    }
+}

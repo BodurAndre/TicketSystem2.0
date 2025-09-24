@@ -95,6 +95,7 @@ async function loadServersByCompany(companyId, selectedId) {
 
 // --- Основная функция загрузки заявки ---
 async function loadTicketData(id) {
+
     try {
         const userRole = localStorage.getItem("role");
         const response = await fetch(`/getRequest/${id}`);

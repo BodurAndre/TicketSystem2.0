@@ -10,6 +10,8 @@
     let currentUser = null;
     let currentPartner = null;
     let isSendingMessage = false; // Флаг для предотвращения дублирования отправки сообщений
+    let messagePollingInterval = null; // Интервал для автоматического обновления сообщений
+    let lastMessageCheck = null; // Время последней проверки сообщений
 
 // Функция инициализации чата
 async function initializeChat() {
@@ -235,6 +237,9 @@ async function openConversation(partner) {
     console.log('📬 Начинаем загрузку сообщений...');
     await loadMessages(partner.id);
     
+    // Запускаем автоматическое обновление сообщений
+    startMessagePolling();
+    
     // Отмечаем как прочитанное
     console.log('✅ Отмечаем сообщения как прочитанные...');
     await markConversationAsRead();
@@ -280,6 +285,59 @@ async function loadMessages(partnerId) {
         console.error('❌ Ошибка загрузки сообщений:', error);
         messages = [];
         renderMessages();
+    }
+}
+
+// Функция для проверки новых сообщений
+async function checkForNewMessages() {
+    if (!currentPartner) {
+        console.log('📬 Нет активного чата, пропускаем проверку сообщений');
+        return;
+    }
+    
+    try {
+        console.log('🔄 Проверяем новые сообщения для пользователя:', currentPartner.id);
+        const response = await fetch(`/api/chat/conversation/${currentPartner.id}`);
+        
+        if (response.ok) {
+            const newMessages = await response.json();
+            const previousCount = messages.length;
+            
+            // Обновляем сообщения только если их количество изменилось
+            if (newMessages.length !== previousCount) {
+                console.log('📬 Обнаружены новые сообщения! Было:', previousCount, 'Стало:', newMessages.length);
+                messages = newMessages;
+                renderMessages();
+                scrollToBottom();
+                lastMessageCheck = new Date();
+            }
+        }
+    } catch (error) {
+        console.error('❌ Ошибка проверки новых сообщений:', error);
+    }
+}
+
+// Функция для запуска автоматического обновления сообщений
+function startMessagePolling() {
+    console.log('🔄 Запускаем автоматическое обновление сообщений');
+    
+    // Останавливаем предыдущий интервал, если он есть
+    if (messagePollingInterval) {
+        clearInterval(messagePollingInterval);
+    }
+    
+    // Проверяем новые сообщения каждые 3 секунды
+    messagePollingInterval = setInterval(checkForNewMessages, 3000);
+    lastMessageCheck = new Date();
+}
+
+// Функция для остановки автоматического обновления сообщений
+function stopMessagePolling() {
+    console.log('⏹️ Останавливаем автоматическое обновление сообщений');
+    
+    if (messagePollingInterval) {
+        clearInterval(messagePollingInterval);
+        messagePollingInterval = null;
     }
 }
 
@@ -445,6 +503,9 @@ function showWelcomeMessage() {
     
     if (chatWelcome) chatWelcome.style.display = 'flex';
     if (chatArea) chatArea.style.display = 'none';
+    
+    // Останавливаем автоматическое обновление сообщений
+    stopMessagePolling();
 }
 
 // Загрузка непрочитанных сообщений
@@ -943,6 +1004,34 @@ async function testSendMessage() {
         console.log('🔧 === ИСПРАВЛЕНИЕ СТРУКТУРЫ ЗАВЕРШЕНО ===');
     }
 
+    // Функция для переключения мобильной боковой панели
+    function toggleMobileSidebar() {
+        console.log('📱 Переключение мобильной боковой панели');
+        
+        const sidebar = document.querySelector('.chat-sidebar');
+        const chatArea = document.getElementById('chat-area');
+        const chatWelcome = document.getElementById('chat-welcome');
+        
+        if (!sidebar) {
+            console.error('❌ Боковая панель не найдена');
+            return;
+        }
+        
+        // Переключаем класс mobile-open
+        sidebar.classList.toggle('mobile-open');
+        
+        // Если панель открыта, скрываем чат
+        if (sidebar.classList.contains('mobile-open')) {
+            console.log('📱 Открываем боковую панель');
+            if (chatArea) chatArea.style.display = 'none';
+            if (chatWelcome) chatWelcome.style.display = 'none';
+        } else {
+            console.log('📱 Закрываем боковую панель');
+            if (chatArea) chatArea.style.display = 'flex';
+            if (chatWelcome) chatWelcome.style.display = 'flex';
+        }
+    }
+
     // Глобальные функции для доступа из HTML
     window.openUserSelectModal = openUserSelectModal;
     window.closeUserSelectModal = closeUserSelectModal;
@@ -950,5 +1039,9 @@ async function testSendMessage() {
     window.testCsrfToken = testCsrfToken;
     window.testSendMessage = testSendMessage;
     window.fixChatStructure = fixChatStructure;
+    window.toggleMobileSidebar = toggleMobileSidebar;
+    window.startMessagePolling = startMessagePolling;
+    window.stopMessagePolling = stopMessagePolling;
+    window.checkForNewMessages = checkForNewMessages;
 
 })(); // Закрываем IIFE

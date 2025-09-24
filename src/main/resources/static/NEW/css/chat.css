@@ -514,6 +514,132 @@ body {
     color: #7f8c8d;
 }
 
+/* Кнопка-гамбургер для мобильных */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #2c3e50;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.3s;
+    margin-right: 10px;
+}
+
+.mobile-menu-btn:hover {
+    background: #f8f9fa;
+    color: #3498db;
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+        height: 100vh;
+    }
+    
+    .chat-sidebar {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .chat-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .chat-main {
+        width: 100%;
+        height: 100vh;
+    }
+    
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    .chat-area .chat-header {
+        padding: 15px;
+    }
+    
+    .messages-container {
+        max-height: calc(100vh - 200px);
+    }
+    
+    .message-input-container {
+        padding: 15px;
+    }
+    
+    .input-wrapper {
+        padding: 6px 6px 6px 12px;
+    }
+    
+    .send-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .message {
+        max-width: 85%;
+        padding: 10px 14px;
+    }
+    
+    .user-item {
+        padding: 12px 15px;
+    }
+    
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .user-info h4 {
+        font-size: 13px;
+    }
+    
+    .user-info p {
+        font-size: 11px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .modal-user-item {
+        padding: 12px;
+    }
+    
+    .modal-user-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .modal-user-info h4 {
+        font-size: 13px;
+    }
+    
+    .modal-user-info p {
+        font-size: 11px;
+    }
+}
+
 /* Скроллбар */
 .users-list::-webkit-scrollbar,
 .messages-container::-webkit-scrollbar {

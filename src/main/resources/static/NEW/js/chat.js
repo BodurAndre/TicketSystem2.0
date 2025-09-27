@@ -423,10 +423,10 @@ async function sendMessage() {
         const csrfToken = csrfData.token;
         
         console.log('🔐 Отправляем сообщение с токеном:', csrfToken);
-        
+
         const requestData = {
             recipientId: currentPartner.id,
-            text: messageText
+            message: messageText
         };
         
         console.log('📤 Данные для отправки:', requestData);

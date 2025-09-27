@@ -35,7 +35,7 @@ public class ChatService {
         }
 
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setMessage(messageCreateDTO.getText()); // Исправлено с getMessage()
+        chatMessage.setMessage(messageCreateDTO.getMessage()); // Исправлено с getMessage()
         chatMessage.setSender(sender);
         chatMessage.setReceiver(receiver);
 

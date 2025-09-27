@@ -117,7 +117,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             if (userService.countUsers() == 0) {
                 UserCreateDTO adminDTO = new UserCreateDTO();
                 adminDTO.setEmail("admin@git.com");
-                adminDTO.setFirstName("Bodur");
+                adminDTO.setFirstName("Admin");
                 adminDTO.setLastName("Andrei");
                 adminDTO.setRole("ADMIN");
                 adminDTO.setCountry("MD");

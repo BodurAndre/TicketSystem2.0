@@ -1,4 +1,4 @@
-// Обертка для предотвращения конфликтов при перезагрузке скрипта
+﻿// Обертка для предотвращения конфликтов при перезагрузке скрипта
 (function() {
     'use strict';
     
@@ -232,6 +232,9 @@ async function openConversation(partner) {
     
     // Обновляем UI
     updateChatUI();
+    
+    // Закрываем мобильную боковую панель
+    closeMobileSidebar();
     
     // Загружаем сообщения
     console.log('📬 Начинаем загрузку сообщений...');
@@ -1006,30 +1009,50 @@ async function testSendMessage() {
 
     // Функция для переключения мобильной боковой панели
     function toggleMobileSidebar() {
-        console.log('📱 Переключение мобильной боковой панели');
+        console.log(" Переключение мобильной боковой панели");
         
-        const sidebar = document.querySelector('.chat-sidebar');
-        const chatArea = document.getElementById('chat-area');
-        const chatWelcome = document.getElementById('chat-welcome');
+        const sidebar = document.querySelector(".chat-sidebar");
+        const chatArea = document.getElementById("chat-area");
+        const chatWelcome = document.getElementById("chat-welcome");
         
         if (!sidebar) {
-            console.error('❌ Боковая панель не найдена');
+            console.error(" Боковая панель не найдена");
             return;
         }
         
         // Переключаем класс mobile-open
-        sidebar.classList.toggle('mobile-open');
+        sidebar.classList.toggle("mobile-open");
         
         // Если панель открыта, скрываем чат
-        if (sidebar.classList.contains('mobile-open')) {
-            console.log('📱 Открываем боковую панель');
-            if (chatArea) chatArea.style.display = 'none';
-            if (chatWelcome) chatWelcome.style.display = 'none';
+        if (sidebar.classList.contains("mobile-open")) {
+            console.log(" Открываем боковую панель");
+            if (chatArea) chatArea.style.display = "none";
+            if (chatWelcome) chatWelcome.style.display = "none";
         } else {
-            console.log('📱 Закрываем боковую панель');
-            if (chatArea) chatArea.style.display = 'flex';
-            if (chatWelcome) chatWelcome.style.display = 'flex';
+            console.log(" Закрываем боковую панель");
+            if (chatArea) chatArea.style.display = "flex";
+            if (chatWelcome) chatWelcome.style.display = "flex";
         }
+    }
+
+    function closeMobileSidebar() {
+        console.log(" Закрытие мобильной боковой панели");
+        
+        const sidebar = document.querySelector(".chat-sidebar");
+        const chatArea = document.getElementById("chat-area");
+        const chatWelcome = document.getElementById("chat-welcome");
+        
+        if (!sidebar) {
+            console.error(" Боковая панель не найдена");
+            return;
+        }
+        
+        // Убираем класс mobile-open
+        sidebar.classList.remove("mobile-open");
+        
+        // Показываем чат
+        if (chatArea) chatArea.style.display = "flex";
+        if (chatWelcome) chatWelcome.style.display = "flex";
     }
 
     // Глобальные функции для доступа из HTML
@@ -1040,6 +1063,7 @@ async function testSendMessage() {
     window.testSendMessage = testSendMessage;
     window.fixChatStructure = fixChatStructure;
     window.toggleMobileSidebar = toggleMobileSidebar;
+    window.closeMobileSidebar = closeMobileSidebar;
     window.startMessagePolling = startMessagePolling;
     window.stopMessagePolling = stopMessagePolling;
     window.checkForNewMessages = checkForNewMessages;

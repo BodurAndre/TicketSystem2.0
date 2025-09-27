@@ -1,4 +1,4 @@
-* Основные стили чата *
+﻿* Основные стили чата *
 #app {
     height: calc(100vh - 120px);
     overflow: hidden;
@@ -489,11 +489,8 @@ body {
 @media (max-width: 768px) {
     .chat-container {
         flex-direction: column;
-        height: 100vh;
-    }
-
-    .chat-container{
-        max-height: 768px;
+        height: calc(100vh - 120px);
+        max-height: calc(100vh - 120px);
     }
 
     .chat-sidebar {
@@ -513,7 +510,8 @@ body {
 
     .chat-main {
         width: 100%;
-        height: 100vh;
+        height: calc(100vh - 120px);
+        max-height: calc(100vh - 120px);
     }
 
     .mobile-menu-btn {
@@ -525,7 +523,7 @@ body {
     }
 
     .messages-container {
-        max-height: calc(100vh - 200px);
+        max-height: calc(100vh - 280px);
     }
 
     .message-input-container {
@@ -548,6 +546,21 @@ body {
 
     .user-item {
         padding: 12px 15px;
+    }
+    
+    /* Дополнительные правила для мобильных устройств */
+    body {
+        overflow-x: hidden;
+    }
+    
+    .table-container {
+        height: calc(100vh - 120px);
+        max-height: calc(100vh - 120px);
+    }
+    
+    .table-wrapper {
+        height: 100%;
+        overflow: hidden;
     }
 
     .user-avatar {

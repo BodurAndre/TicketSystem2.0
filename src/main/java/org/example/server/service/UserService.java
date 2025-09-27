@@ -1,5 +1,6 @@
 package org.example.server.service;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.server.DTO.UserCreateDTO;
 import org.example.server.DTO.UserUpdateDTO;
@@ -106,5 +107,21 @@ public class UserService {
 
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public void updatePasswordUser(String userEmail, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(userEmail);
+        if (user == null) {
+            throw new IllegalArgumentException("Пользователь не найден");
+        }
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Старый пароль неверный");
+        }
+
+        // Дополнительно: можно проверять на минимальную длину, сложность и т.д.
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

@@ -43,11 +43,25 @@ async function initializeChat() {
         
         // Показываем приветственное сообщение
         console.log('👋 Показываем приветственное сообщение...');
-        showWelcomeMessage();
+        // Проверяем, есть ли сохраненный последний открытый чат
+        const lastOpenChatId = localStorage.getItem("lastOpenChat");
         
-        // Автоматически открываем первый активный чат
-        console.log('🚀 Автоматически открываем чат с первым активным пользователем...');
-        await openFirstActiveChat();
+        if (lastOpenChatId) {
+            console.log(" Восстанавливаем последний открытый чат:", lastOpenChatId);
+            // Пытаемся найти и открыть последний чат
+            const lastPartner = partners.find(partner => partner.id == lastOpenChatId);
+            if (lastPartner) {
+                await openConversation(lastPartner);
+            } else {
+                // Если партнер не найден, показываем список пользователей
+                console.log(" Партнер не найден, показываем список пользователей");
+                showWelcomeMessage();
+            }
+        } else {
+            // Если нет сохраненного чата, показываем список пользователей
+            console.log(" Нет сохраненного чата, показываем список пользователей");
+            showWelcomeMessage();
+        }
         
         console.log('🎉 ИНИЦИАЛИЗАЦИЯ ЧАТА ЗАВЕРШЕНА УСПЕШНО!');
         
@@ -220,6 +234,12 @@ async function openConversation(partner) {
     // Добавляем в активные чаты
     addActiveChat(partner.id);
     
+    // Сохраняем последний открытый чат
+    localStorage.setItem("lastOpenChat", partner.id.toString());
+    
+    // Сохраняем последний открытый чат
+    localStorage.setItem("lastOpenChat", partner.id.toString());
+    
     // Добавляем партнера в список, если его там нет
     const existingElement = document.querySelector(`[data-partner-id="${partner.id}"]`);
     if (!existingElement) {
@@ -252,20 +272,29 @@ async function openConversation(partner) {
 
 // Обновление UI чата
 function updateChatUI() {
-    const chatWelcome = document.getElementById('chat-welcome');
-    const chatArea = document.getElementById('chat-area');
-    const partnerName = document.getElementById('partner-name');
+    const chatSidebar = document.getElementById("chat-sidebar");
+    const chatArea = document.getElementById("chat-area");
+    const partnerName = document.getElementById("partner-name");
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
     
-    if (chatWelcome) chatWelcome.style.display = 'none';
-    if (chatArea) chatArea.style.display = 'flex';
+    // Скрываем боковую панель на мобильных устройствах
+    if (chatSidebar && window.innerWidth <= 768) {
+        chatSidebar.classList.remove("mobile-open");
+    }
+    // Показываем область чата
+    if (chatArea) chatArea.style.display = "flex";
     if (partnerName && currentPartner) {
-        partnerName.textContent = `${currentPartner.firstName.toUpperCase()} ${currentPartner.lastName.toUpperCase()}`;
+        partnerName.textContent = `${currentPartner.firstName} ${currentPartner.lastName}`;
+    }
+    // Показываем кнопку бургера на мобильных
+    if (mobileMenuBtn && window.innerWidth <= 768) {
+        mobileMenuBtn.style.display = "block";
     }
     
     // Обновляем активный элемент в списке
-    document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll(".user-item").forEach(item => item.classList.remove("active"));
     const activeItem = document.querySelector(`[data-partner-id="${currentPartner.id}"]`);
-    if (activeItem) activeItem.classList.add('active');
+    if (activeItem) activeItem.classList.add("active");
 }
 
 // Загрузка сообщений
@@ -501,11 +530,24 @@ async function markConversationAsRead() {
 
 // Показ приветственного сообщения
 function showWelcomeMessage() {
-    const chatWelcome = document.getElementById('chat-welcome');
-    const chatArea = document.getElementById('chat-area');
+    const chatSidebar = document.getElementById("chat-sidebar");
+    const chatArea = document.getElementById("chat-area");
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
     
-    if (chatWelcome) chatWelcome.style.display = 'flex';
-    if (chatArea) chatArea.style.display = 'none';
+    // Показываем боковую панель с пользователями
+    if (chatSidebar) {
+        chatSidebar.style.display = "block";
+        // На мобильных устройствах показываем панель сразу
+        if (window.innerWidth <= 768) {
+            chatSidebar.classList.add("mobile-open");
+        }
+    }
+    // Скрываем область чата
+    if (chatArea) chatArea.style.display = "none";
+    // Показываем кнопку бургера на мобильных
+    if (mobileMenuBtn && window.innerWidth <= 768) {
+        mobileMenuBtn.style.display = "block";
+    }
     
     // Останавливаем автоматическое обновление сообщений
     stopMessagePolling();

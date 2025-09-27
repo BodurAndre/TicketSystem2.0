@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', route);
+﻿window.addEventListener('DOMContentLoaded', route);
 window.addEventListener('hashchange', route);
 
 function route() {
@@ -329,25 +329,90 @@ window.initMyAccount = async function() {
         }
     };
 
+
     passwordBtn.onclick = function() {
         setActive(passwordBtn);
         content.innerHTML = `
-            <form style="max-width:400px;margin:0 auto;">
-                <div class="account-label">Старый пароль</div>
-                <input type="password" class="account-value" style="width:100%;margin-bottom:16px;" disabled placeholder="Пока недоступно">
-                <div class="account-label">Новый пароль</div>
-                <input type="password" class="account-value" style="width:100%;margin-bottom:16px;" disabled placeholder="Пока недоступно">
-                <div class="account-label">Повторите новый пароль</div>
-                <input type="password" class="account-value" style="width:100%;margin-bottom:24px;" disabled placeholder="Пока недоступно">
-                <button type="button" class="modal-btn" style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);" disabled>Сохранить</button>
-            </form>
-            <div style="color:#888;text-align:center;margin-top:12px;">Изменение пароля будет доступно позже</div>
-        `;
+        <form id="passwordForm" style="max-width:400px;margin:0 auto;">
+            <div class="account-label">Старый пароль</div>
+            <input type="password" id="oldPassword" class="account-value" style="width:100%;margin-bottom:16px;" placeholder="Введите старый пароль">
+            <div class="account-label">Новый пароль</div>
+            <input type="password" id="newPassword" class="account-value" style="width:100%;margin-bottom:16px;" placeholder="Введите новый пароль">
+            <div class="account-label">Повторите новый пароль</div>
+            <input type="password" id="repeatPassword" class="account-value" style="width:100%;margin-bottom:24px;" placeholder="Повторите новый пароль">
+            <button type="button" id="updatePasswordBtn" class="modal-btn" style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);">Сохранить</button>
+        </form>
+    `;
+
+        // Навешиваем обработчик **только после добавления формы в DOM**
+        updatePasswordUser();
     };
+
 
     // По умолчанию показываем персональные данные
     personalBtn.click();
 };
+
+function validateUserForm() {
+    const oldPassword = document.getElementById('oldPassword').value.trim();
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const repeatPassword = document.getElementById('repeatPassword').value.trim();
+
+    if (!oldPassword || !newPassword || !repeatPassword) {
+        showNotification("Все поля обязательны", "error");
+        return false;
+    }
+
+    if (newPassword !== repeatPassword) {
+        showNotification("Новые пароли не совпадают", "error");
+        return false;
+    }
+
+    if (newPassword.length < 1) {
+        showNotification("Пароль должен быть минимум 6 символов", "error");
+        return false;
+    }
+
+    return true;
+}
+
+function updatePasswordUser() {
+    const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+    if (updatePasswordBtn) {
+        updatePasswordBtn.onclick = async function () {
+            if (!validateUserForm()) return;
+
+            const data = {
+                oldPassword: document.getElementById('oldPassword').value.trim(),
+                newPassword: document.getElementById('newPassword').value.trim()
+            };
+
+            try {
+                const csrf = await getCsrfToken();
+                $.ajax({
+                    url: "/updatePasswordUser",
+                    method: "POST",
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    headers: {[csrf.headerName]: csrf.token},
+                    xhrFields: {withCredentials: true},
+                    success: function (response) {
+                        showNotification(response.message || "Пароль успешно изменен", 'success');
+                        document.getElementById('passwordForm').reset();
+                    },
+                    error: function (error) {
+                        const message = error.responseJSON?.message || "Неизвестная ошибка";
+                        showNotification(message, 'error');
+                    }
+                });
+            } catch (error) {
+                console.error("Error:", error);
+                showNotification("Ошибка запроса", 'error');
+            }
+        }
+    }
+}
 
 // Функция загрузки страницы чата
 async function loadPageChat() {
@@ -379,4 +444,18 @@ async function loadPageChat() {
         console.error('Ошибка загрузки чата:', error);
         document.getElementById('app').innerHTML = '<div style="color:red;text-align:center;">Ошибка загрузки чата</div>';
     }
+}
+
+// Получение CSRF токена
+async function getCsrfToken() {
+    return $.ajax({
+        url: "/csrf-token",
+        method: "GET",
+        dataType: "json",
+        xhrFields: { withCredentials: true }
+    }).then(data => ({ headerName: data.headerName, token: data.token }))
+        .catch(() => {
+            console.error("Error fetching CSRF token");
+            throw new Error("CSRF token error");
+        });
 }

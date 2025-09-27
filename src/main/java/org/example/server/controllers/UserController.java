@@ -171,6 +171,30 @@ public class UserController {
         }
     }
 
+    @PostMapping("/updatePasswordUser")
+    public ResponseEntity<?> updatePasswordUser(@RequestBody Map<String, String> passwords) {
+        try {
+            String oldPassword = passwords.get("oldPassword");
+            String newPassword = passwords.get("newPassword");
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userEmail = authentication.getName();
+
+            userService.updatePasswordUser(userEmail, oldPassword, newPassword);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Пароль успешно изменен"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Internal server error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Ошибка сервера"));
+        }
+    }
+
+
     @PostMapping("/createUser")
     public ResponseEntity<?> createUser(@RequestBody UserCreateDTO userCreateDTO) {
         try {
@@ -198,6 +222,8 @@ public class UserController {
                     .body(Collections.singletonMap("message", "Ошибка при создании пользователя"));
         }
     }
+
+
 
     @PostMapping("/resetPasswordUser")
     public ResponseEntity<?> resetPasswordUser(@RequestBody String email,

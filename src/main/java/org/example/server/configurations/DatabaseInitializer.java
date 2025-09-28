@@ -121,6 +121,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 adminDTO.setLastName("Andrei");
                 adminDTO.setRole("ADMIN");
                 adminDTO.setCountry("MD");
+                adminDTO.setLastSeen("Never");
                 adminDTO.setDateOfBirth("2000-05-04");
                 adminDTO.setGender("MALE");
                 userService.createUser(adminDTO, "12345");

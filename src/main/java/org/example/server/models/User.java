@@ -47,6 +47,12 @@ public class User {
     @Column(name = "FIRSTLOGIN")
     private Boolean firstLogin;
 
+    @Column(name = "LAST_SEEN")
+    private Date lastSeen;
+
+    @Column(name = "IS_ONLINE")
+    private Boolean isOnline = false;
+
     public User(String email, String password, String firstName, String lastName, String dateOfBirth, String gender) {
         this.email = email;
         this.password = password;

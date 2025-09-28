@@ -1,4 +1,4 @@
-// Инициализация страницы статистики
+﻿// Инициализация страницы статистики
 window.initStatistics = async function() {
     console.log('Инициализация страницы статистики...');
     try {
@@ -48,8 +48,8 @@ async function loadStatistics() {
 
         // Загружаем данные о пользователях
         console.log('Загружаем пользователей...');
-        const usersResponse = await fetch('/users');
-        console.log('Ответ от /users:', usersResponse.status, usersResponse.statusText);
+        const usersResponse = await fetch('/getUsers');
+        console.log('Ответ от /getUsers:', usersResponse.status, usersResponse.statusText);
         
         if (!usersResponse.ok) {
             console.error('Ошибка загрузки пользователей:', usersResponse.status, usersResponse.statusText);

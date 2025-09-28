@@ -16,4 +16,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     List<User> findAllByEmailNotAndRoleNot(String email, String role);
     List<User> findAllByEmailNot(String email);
     User findByEmail(String email);
+    
+    // Методы для работы с активностью пользователей
+    List<User> findByIsOnlineTrue();
+    long countByIsOnlineTrue();
 }

@@ -69,14 +69,25 @@ public class AuthController {
         return "login";
     }
 
-    @RequestMapping(value = "/logout",method = RequestMethod.GET)
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public String logout(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        session.invalidate();
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(null);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            String email = authentication.getName(); // логин пользователя (обычно email/username)
+            userService.setOnline(email, false);
+        }
+
+        // Чистим сессию и контекст
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        SecurityContextHolder.clearContext();
         return "redirect:/login";
     }
+
 
     @GetMapping("/success-login")
     public String successLoginPage(@RequestParam("role") String role, Model model) {

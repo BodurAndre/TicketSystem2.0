@@ -3,10 +3,15 @@ package org.example.server.service;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.server.DTO.UserCreateDTO;
+import org.example.server.DTO.UserDTO;
 import org.example.server.DTO.UserUpdateDTO;
 import org.example.server.models.Request;
 import org.example.server.models.User;
 import org.example.server.repositories.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -14,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -90,28 +97,68 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public void resetPasswordUser(Long id, String generatedPassword) {
+    public String resetPasswordUser(Long id, String generatedPassword) {
         User user = getUser(id);
         user.setPassword(passwordEncoder.encode(generatedPassword));
         userRepository.save(user);
+        return user.getEmail();
     }
 
     public long countUsers() {
         return userRepository.count();
     }
 
-    public List<User> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
-        return users.isEmpty() ? new ArrayList<>() : users;
+
+        // Получаем текущего пользователя из SecurityContext
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+
+        return users.stream()
+                .map(user -> new UserDTO(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getDateOfBirth(),
+                        user.getGender(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getIsOnline(),
+                        user.getLastSeen(),
+                        user.getProfilePhotoUrl(),
+                        user.getRole(),
+                        user.getEmail().equals(username) // здесь сравниваем с username
+                ))
+                .toList();
     }
+
+
 
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    public void setOnline(String email, boolean status) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("Пользователь не найден");
+        }
+
+        user.setIsOnline(status);
+        Date now = new Date();
+        user.setLastSeen(now);
+        userRepository.save(user);
+    }
+
     @Transactional
-    public void updatePasswordUser(String userEmail, String oldPassword, String newPassword) {
-        User user = userRepository.findByEmail(userEmail);
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new IllegalArgumentException("Пользователь не найден");
         }
@@ -120,8 +167,13 @@ public class UserService {
             throw new IllegalArgumentException("Старый пароль неверный");
         }
 
-        // Дополнительно: можно проверять на минимальную длину, сложность и т.д.
+        if (oldPassword.equals(newPassword)) {
+            throw new IllegalArgumentException("Новый пароль не должен совпадать со старым");
+        }
+
+        // Можно добавить проверку сложности пароля, длины и т.д.
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
 }

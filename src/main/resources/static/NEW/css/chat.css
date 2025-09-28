@@ -1,4 +1,4 @@
-﻿* Основные стили чата *
+* Основные стили чата *
 #app {
     height: calc(100vh - 120px);
     overflow: hidden;
@@ -81,13 +81,28 @@ body {
 }
 
 .user-item.active::before {
-    content: '';
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
     width: 4px;
     background: #fff;
+}
+
+/* Стили для статуса пользователей */
+.user-status {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 2px;
+    display: block;
+}
+
+.user-status.online {
+    color: white;
+}
+
+.user-status.offline {
+    color: white;
 }
 
 .user-avatar {

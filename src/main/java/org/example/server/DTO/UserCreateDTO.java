@@ -11,4 +11,5 @@ public class UserCreateDTO {
     private String country;
     private String dateOfBirth;
     private String gender;
+    private String lastSeen;
 }

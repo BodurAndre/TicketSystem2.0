@@ -260,7 +260,7 @@ window.initMyAccount = async function() {
         setActive(personalBtn);
         content.innerHTML = '<div style="text-align:center;color:#888;">Загрузка...</div>';
         try {
-            const resp = await fetch('/getCurrentUser');
+            const resp = await fetch('/api/user/current');
             if (!resp.ok) throw new Error('Ошибка загрузки данных');
             const user = await resp.json();
             content.innerHTML = `

@@ -1,13 +1,11 @@
 package org.example.server.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.server.DTO.RequestUpdateDTO;
-import org.example.server.DTO.UserCreateDTO;
-import org.example.server.DTO.UserDTO;
-import org.example.server.DTO.UserUpdateDTO;
+import org.example.server.DTO.*;
 import org.example.server.models.Request;
 import org.example.server.models.User;
 import org.example.server.service.UserService;
+import org.example.server.service.UserActivityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,14 +26,16 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
+    private final UserActivityService userActivityService;
 
-    public UserController(final UserService userService) {
+    public UserController(final UserService userService, final UserActivityService userActivityService) {
         this.userService = userService;
+        this.userActivityService = userActivityService;
     }
 
     @GetMapping(value = "/getUsers", produces = "application/json")
     @ResponseBody
-    public List<User> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         return userService.getAllUsers();
     }
 
@@ -50,110 +50,59 @@ public class UserController {
         } else {
             username = principal.toString();
         }
+
         return userService.getAllUsersWithoutCurrentUser(username);
     }
 
     @GetMapping(value = "/api/users/all", produces = "application/json")
     @ResponseBody
-    public List<User> getAllUsersForFilters() {
+    public List<UserDTO> getAllUsersForChat() {
         return userService.getAllUsers();
     }
 
-    @GetMapping(value = "/getUser/{id}", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<?> getRequest(@PathVariable long id) {
-        User user = userService.getUser(id);
 
-        if (user == null) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Не найден пользователь");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        }
-
-        return ResponseEntity.ok(user);
-    }
-
-    @GetMapping(value = "/getCurrentUser", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<?> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Пользователь не аутентифицирован");
-        }
-
-        String username;
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-
-        User user = userService.getUserByEmail(username);
-
-        if (user == null) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Не найден пользователь");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        }
-
-        return ResponseEntity.ok(user);
-    }
-
-    @GetMapping(value = "/getDTOUser", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<?> getDTOUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Пользователь не аутентифицирован");
-        }
-
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!isAdmin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Недостаточно прав для доступа");
-        }
-
-        String username;
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-
-        List<User> users = userService.getAllUsersWithoutCurrentUserAndUser(username);
-
-        List<UserDTO> userDTO = users.stream()
-                .map(user -> new UserDTO(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName()))
-                .collect(Collectors.toList());
-        log.warn("Пользователи" + userDTO);
-        return ResponseEntity.ok(userDTO);
-    }
-
-    @GetMapping(value = "/users", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<?> getAllUsersForStatistics() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Пользователь не аутентифицирован");
-        }
-
+    @PostMapping("/resetPasswordUser")
+    public ResponseEntity<?> resetPassword(@RequestParam Long id) {
         try {
-            List<User> users = userService.getAllUsers();
-            return ResponseEntity.ok(users);
+            // Генерируем временный пароль
+            String tempPassword = generateTempPassword();
+
+            // Сбрасываем пароль в БД
+            String email = userService.resetPasswordUser(id, tempPassword);
+
+            // Создаём DTO с логином и новым паролем
+            UserResetPassword userResetPassword = new UserResetPassword(email, tempPassword);
+
+            return ResponseEntity.ok(userResetPassword);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            log.error("Error getting users for statistics: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Ошибка при получении списка пользователей\"}");
+                    .body(Map.of("message", "Ошибка при сбросе пароля"));
+        }
+    }
+
+    @PostMapping(value = "/createUser", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> createUser(@RequestBody UserCreateDTO userCreateDTO) {
+        try {
+            log.warn("userCreateDTO - " + userCreateDTO);
+            // Генерируем временный пароль
+            String tempPassword = generateTempPassword();
+            userService.createUser(userCreateDTO, tempPassword);
+
+            // Создаем ответ с данными пользователя
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Пользователь создан");
+            response.put("email", userCreateDTO.getEmail());
+            response.put("password", tempPassword);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            log.error("Internal server error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при создании пользователя\"}");
         }
     }
 
@@ -167,152 +116,155 @@ public class UserController {
         } catch (Exception e) {
             log.error("Internal server error: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Ошибка при обновлении данных пользователя\"}");
+                    .body("{\"message\": \"Ошибка при обновлении пользователя\"}");
         }
     }
 
-    @PostMapping("/updatePasswordUser")
-    public ResponseEntity<?> updatePasswordUser(@RequestBody Map<String, String> passwords) {
+    @PostMapping("/deleteUser")
+    public ResponseEntity<?> deleteUser(@RequestBody Map<String, Long> request) {
         try {
-            String oldPassword = passwords.get("oldPassword");
-            String newPassword = passwords.get("newPassword");
-
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userEmail = authentication.getName();
-
-            userService.updatePasswordUser(userEmail, oldPassword, newPassword);
-
+            Long userId = request.get("id");
+            log.warn("Deleting user with ID: " + userId);
+            userService.deleteUser(userId);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Пароль успешно изменен"));
+                    .body("{\"message\": \"Пользователь удален\"}");
+        } catch (Exception e) {
+            log.error("Internal server error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при удалении пользователя\"}");
+        }
+    }
+
+    @GetMapping("/api/user/current")
+    @ResponseBody
+    public ResponseEntity<?> getCurrentUser() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username;
+
+            if (principal instanceof UserDetails) {
+                username = ((UserDetails) principal).getUsername();
+            } else {
+                username = principal.toString();
+            }
+
+            User user = userService.getUserByEmail(username);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("{\"message\": \"Пользователь не найден\"}");
+            }
+            UserDTO userDTO = new UserDTO(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getDateOfBirth(),
+                    user.getGender(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getIsOnline(),
+                    user.getLastSeen(),
+                    user.getProfilePhotoUrl(),
+                    user.getRole(),
+                    true // так как это и есть текущий пользователь
+            );
+            return ResponseEntity.ok(userDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при получении данных пользователя\"}");
+        }
+    }
+
+    // Endpoint для отметки активности пользователя
+    @PostMapping("/api/user/activity")
+    @ResponseBody
+    public ResponseEntity<String> markUserActivity() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username;
+            
+            if (principal instanceof UserDetails) {
+                username = ((UserDetails) principal).getUsername();
+            } else {
+                username = principal.toString();
+            }
+            
+            User user = userService.getUserByEmail(username);
+            if (user != null) {
+                userActivityService.markUserAsActive(user.getId());
+                return ResponseEntity.ok("{\"message\": \"Активность отмечена\"}");
+            }
+            
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("{\"message\": \"Пользователь не найден\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Ошибка при отметке активности\"}");
+        }
+    }
+
+    // Endpoint для получения активных пользователей
+    @GetMapping("/api/users/active")
+    @ResponseBody
+    public ResponseEntity<List<User>> getActiveUsers() {
+        try {
+            List<User> activeUsers = userActivityService.getActiveUsers();
+            return ResponseEntity.ok(activeUsers);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // Endpoint для получения количества активных пользователей
+    @GetMapping("/api/users/active/count")
+    @ResponseBody
+    public ResponseEntity<Map<String, Long>> getActiveUsersCount() {
+        try {
+            long count = userActivityService.getActiveUsersCount();
+            Map<String, Long> response = new HashMap<>();
+            response.put("count", count);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+    @PostMapping("/updatePasswordUser")
+    public ResponseEntity<?> updatePasswordUser(@RequestBody Map<String, String> body) {
+        String oldPassword = body.get("oldPassword");
+        String newPassword = body.get("newPassword");
+
+        try {
+            // Получаем текущего пользователя
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+
+            // Вызываем сервис
+            userService.changePassword(email, oldPassword, newPassword);
+
+            return ResponseEntity.ok(Map.of("message", "Пароль успешно изменен"));
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            log.error("Internal server error: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Ошибка сервера"));
         }
     }
 
 
-    @PostMapping("/createUser")
-    public ResponseEntity<?> createUser(@RequestBody UserCreateDTO userCreateDTO) {
-        try {
-            log.warn("userCreateDTO - " + userCreateDTO);
-
-            String generatedPassword = generatePassword(8);
-            String email = userCreateDTO.getEmail();
-            userService.createUser(userCreateDTO, generatedPassword);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Пользователь успешно создан");
-            response.put("email", email);
-            response.put("password", generatedPassword);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-        } catch (IllegalArgumentException e) {
-            log.warn("Ошибка при создании пользователя: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Collections.singletonMap("message", e.getMessage()));
-
-        } catch (Exception e) {
-            log.error("Internal server error: " + e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Ошибка при создании пользователя"));
-        }
-    }
-
-
-
-    @PostMapping("/resetPasswordUser")
-    public ResponseEntity<?> resetPasswordUser(@RequestBody String email,
-                                               @RequestParam Long id) {
-        try {
-            log.warn("Email - " + email);
-            log.warn("id - " + id);
-            String generatedPassword = generatePassword(8);
-
-            userService.resetPasswordUser(id, generatedPassword);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Пароль успешно сброшен");
-            response.put("email", email);
-            response.put("password", generatedPassword);
-            log.warn("Password - " + generatedPassword);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-        } catch (IllegalArgumentException e) {
-            log.warn("Ошибка при создании пользователя: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Collections.singletonMap("message", e.getMessage()));
-
-        } catch (Exception e) {
-            log.error("Internal server error: " + e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Ошибка при создании пользователя"));
-        }
-    }
-
-    @DeleteMapping("/deleteUser/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable long id) {
-        try {
-            userService.deleteUser(id);
-            return ResponseEntity.ok().body("{\"message\": \"Пользователь успешно удален\"}");
-        } catch (Exception e) {
-            log.error("Ошибка при удалении пользователя: " + e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Ошибка при удалении пользователя\"}");
-        }
-    }
-
-    private String generatePassword(int length) {
-        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    private String generateTempPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         SecureRandom random = new SecureRandom();
         StringBuilder password = new StringBuilder();
-
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(charSet.length());
-            password.append(charSet.charAt(index));
+        
+        for (int i = 0; i < 8; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
         }
-
+        
         return password.toString();
     }
 
-    @GetMapping(value = "/api/user/current", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<?> getCurrentUserInfo() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userEmail = authentication.getName();
-            
-            User currentUser = userService.getUserByEmail(userEmail);
-            if (currentUser == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("{\"message\": \"Пользователь не найден\"}");
-            }
-            
-            return ResponseEntity.ok(currentUser);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Ошибка при получении данных пользователя\"}");
-        }
-    }
 
-    @GetMapping(value = "/api/users/{id}", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
-        try {
-            User user = userService.getUserById(id);
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("{\"message\": \"Пользователь не найден\"}");
-            }
-            
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Ошибка при получении данных пользователя\"}");
-        }
-    }
 }

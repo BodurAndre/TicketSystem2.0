@@ -584,3 +584,21 @@ body {
         font-size: 14px;
     }
 }
+
+.status {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.status.online {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.offline {
+    background-color: #f8d7da;
+    color: #721c24;
+}

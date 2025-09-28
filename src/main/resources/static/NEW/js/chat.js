@@ -272,31 +272,39 @@ async function openConversation(partner) {
 }
 
 // Обновление UI чата
-function updateChatUI() {
-    const chatSidebar = document.getElementById("chat-sidebar");
-    const chatArea = document.getElementById("chat-area");
-    const partnerName = document.getElementById("partner-name");
-    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    function updateChatUI() {
+        const chatSidebar = document.getElementById("chat-sidebar");
+        const chatArea = document.getElementById("chat-area");
+        const partnerName = document.getElementById("partner-name");
+        const partnerStatus = document.getElementById("partner-status");
+        const mobileMenuBtn = document.getElementById("mobile-menu-btn");
 
-    // Скрываем боковую панель на мобильных устройствах
-    if (chatSidebar && window.innerWidth <= 768) {
-        chatSidebar.classList.remove("mobile-open");
-    }
-    // Показываем область чата
-    if (chatArea) chatArea.style.display = "flex";
-    if (partnerName && currentPartner) {
-        partnerName.textContent = `${currentPartner.firstName} ${currentPartner.lastName}`;
-    }
-    // Показываем кнопку бургера на мобильных
-    if (mobileMenuBtn && window.innerWidth <= 768) {
-        mobileMenuBtn.style.display = "block";
-    }
+        // Скрываем боковую панель на мобильных устройствах
+        if (chatSidebar && window.innerWidth <= 768) {
+            chatSidebar.classList.remove("mobile-open");
+        }
+        // Показываем область чата
+        if (chatArea) chatArea.style.display = "flex";
+        if (partnerName && currentPartner) {
+            partnerName.textContent = `${currentPartner.firstName} ${currentPartner.lastName}`;
+        }
 
-    // Обновляем активный элемент в списке
-    document.querySelectorAll(".user-item").forEach(item => item.classList.remove("active"));
-    const activeItem = document.querySelector(`[data-partner-id="${currentPartner.id}"]`);
-    if (activeItem) activeItem.classList.add("active");
-}
+        // Обновляем статус партнера
+        if (partnerStatus && currentPartner) {
+            partnerStatus.textContent = currentPartner.isOnline ? 'Онлайн' : formatLastSeen(currentPartner.lastSeen);
+            partnerStatus.className = 'status ' + (currentPartner.isOnline ? 'online' : 'offline');
+        }
+
+        // Показываем кнопку бургера на мобильных
+        if (mobileMenuBtn && window.innerWidth <= 768) {
+            mobileMenuBtn.style.display = "block";
+        }
+
+        // Обновляем активный элемент в списке
+        document.querySelectorAll(".user-item").forEach(item => item.classList.remove("active"));
+        const activeItem = document.querySelector(`[data-partner-id="${currentPartner.id}"]`);
+        if (activeItem) activeItem.classList.add("active");
+    }
 
 // Загрузка сообщений
 async function loadMessages(partnerId) {

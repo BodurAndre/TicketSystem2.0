@@ -3,7 +3,6 @@ package org.example.server.DTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.server.models.ChatMessage;
 
 import java.time.LocalDateTime;
 
@@ -13,10 +12,12 @@ import java.time.LocalDateTime;
 public class ChatMessageDTO {
     private Long id;
     private String message;
+    private String text; // Для WebSocket совместимости
     private Long senderId;
     private String senderName;
     private String senderEmail;
     private Long receiverId;
+    private Long recipientId; // Для WebSocket совместимости
     private String receiverName;
     private String receiverEmail;
     private LocalDateTime createdAt;

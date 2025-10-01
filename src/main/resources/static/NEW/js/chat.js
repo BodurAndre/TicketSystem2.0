@@ -1,4 +1,4 @@
-﻿// Обертка для предотвращения конфликтов при перезагрузке скрипта
+// Обертка для предотвращения конфликтов при перезагрузке скрипта
 (function() {
     'use strict';
 
@@ -12,6 +12,10 @@
     let isSendingMessage = false; // Флаг для предотвращения дублирования отправки сообщений
     let messagePollingInterval = null; // Интервал для автоматического обновления сообщений
     let lastMessageCheck = null; // Время последней проверки сообщений
+    
+    // WebSocket connection
+    let stompClient = null;
+    let isConnected = false;
 
 // Функция инициализации чата
 async function initializeChat() {
@@ -40,7 +44,8 @@ async function initializeChat() {
         await loadUnreadMessages();
 
         console.log('✅ Непрочитанные сообщения загружены');
-
+        console.log('🔌 Подключаемся к WebSocket...');
+        connectWebSocket();
         // Показываем приветственное сообщение
         console.log('👋 Показываем приветственное сообщение...');
         // Проверяем, есть ли сохраненный последний открытый чат
@@ -1157,36 +1162,49 @@ async function testSendMessage() {
     // Export function
     window.formatLastSeen = formatLastSeen;
 
-    // Function to mark user as active
-    /*
-    async function markUserAsActive() {
-        try {
-            const response = await fetch("/api/user/activity", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
+    function connectWebSocket() {
+        const socket = new SockJS("/ws");
+        stompClient = Stomp.over(socket);
 
-            if (response.ok) {
-                console.log("✅ User marked as active");
-                console.log(response);
+        stompClient.connect({}, function (frame) {
+            console.log("Connected to WebSocket: " + frame);
+            isConnected = true;
+
+            if (currentUser) {
+                stompClient.subscribe("/user/" + currentUser.id + "/queue/messages", function (message) {
+                    const chatMessage = JSON.parse(message.body);
+                    handleNewMessage(chatMessage);
+                });
             }
-        } catch (error) {
-            console.error("❌ Error marking user as active:", error);
+        }, function (error) {
+            console.error("WebSocket connection error: " + error);
+            isConnected = false;
+        });
+    }
+
+    function handleNewMessage(chatMessage) {
+        if (currentPartner && currentPartner.id === chatMessage.senderId) {
+            messages.push(chatMessage);
+            renderMessages();
+            scrollToBottom();
+        } else {
+            showNotification("Новое сообщение от " + chatMessage.senderName);
         }
     }
 
-    // Function to start activity tracking
-    function startActivityTracking() {
-        // Mark user as active every 2 minutes
-        setInterval(async () => {
-            await markUserAsActive();
-        }, 120000); // 2 minutes
+    function sendMessageViaWebSocket(messageText, recipientId) {
+        if (stompClient && isConnected) {
+            const message = {
+                text: messageText,
+                recipientId: recipientId
+            };
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(message));
+            return true;
+        }
+        return false;
     }
 
-    // Export functions
-    window.markUserAsActive = markUserAsActive;
-    window.startActivityTracking = startActivityTracking;
-*/
+// Export functions
+    window.connectWebSocket = connectWebSocket;
+    window.sendMessageViaWebSocket = sendMessageViaWebSocket;
 })();// Close IIFE

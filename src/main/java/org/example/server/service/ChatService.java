@@ -93,19 +93,30 @@ public class ChatService {
         chatMessageRepository.saveAll(unreadMessages);
     }
 
-    private ChatMessageDTO mapToDTO(ChatMessage message) {
-        return new ChatMessageDTO(
-                message.getId(),
-                message.getMessage(),
-                message.getSender().getId(),
-                message.getSender().getFirstName() + " " + message.getSender().getLastName(),
-                message.getSender().getEmail(),
-                message.getReceiver().getId(),
-                message.getReceiver().getFirstName() + " " + message.getReceiver().getLastName(),
-                message.getReceiver().getEmail(),
-                message.getCreatedAt(),
-                message.getIsRead(),
-                message.getReadAt()
-        );
+    public ChatMessage saveMessage(ChatMessage message) {
+        return chatMessageRepository.save(message);
     }
+
+    private ChatMessageDTO mapToDTO(ChatMessage message) {
+        ChatMessageDTO dto = new ChatMessageDTO();
+        dto.setId(message.getId());
+        dto.setMessage(message.getMessage());
+        dto.setText(message.getMessage()); // Для WebSocket
+        if (message.getSender() != null) {
+            dto.setSenderId(message.getSender().getId());
+            dto.setSenderName(message.getSender().getFirstName() + " " + message.getSender().getLastName());
+            dto.setSenderEmail(message.getSender().getEmail());
+        }
+        if (message.getReceiver() != null) {
+            dto.setReceiverId(message.getReceiver().getId());
+            dto.setRecipientId(message.getReceiver().getId()); // Для WebSocket
+            dto.setReceiverName(message.getReceiver().getFirstName() + " " + message.getReceiver().getLastName());
+            dto.setReceiverEmail(message.getReceiver().getEmail());
+        }
+        dto.setCreatedAt(message.getCreatedAt());
+        dto.setIsRead(message.getIsRead());
+        dto.setReadAt(message.getReadAt());
+        return dto;
+    }
+
 }

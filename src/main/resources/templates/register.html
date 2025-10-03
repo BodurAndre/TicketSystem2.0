@@ -1,42 +1,100 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <link rel="stylesheet" href="/css/register.css" />
+    <title>Регистрация - TicketSystem</title>
+    <link rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-<p th:if="${param.error}" class="error">Registration failed</p>
-<form th:action="@{/register}" method="post" th:object="${user}">
-    <label for="email">Email</label>
-    <input type="email" id="email" th:field="*{email}" required />
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h1>TicketSystem</h1>
+                </div>
+                <p class="login-subtitle">Регистрация нового пользователя</p>
+            </div>
+            
+            <form th:action="@{/register}" method="post" th:object="${user}" class="login-form">
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
+                    <input type="email" id="email" th:field="*{email}" placeholder="Введите ваш email" required />
+                </div>
 
-    <label for="password">Password</label>
-    <input type="password" id="password" th:field="*{password}" required />
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Пароль
+                    </label>
+                    <input type="password" id="password" th:field="*{password}" placeholder="Введите пароль" required />
+                </div>
 
-    <label for="first_name">First Name</label>
-    <input type="text" id="first_name" th:field="*{firstName}" required />
+                <div class="form-group">
+                    <label for="first_name">
+                        <i class="fas fa-user"></i>
+                        Имя
+                    </label>
+                    <input type="text" id="first_name" th:field="*{firstName}" placeholder="Введите ваше имя" required />
+                </div>
 
-    <label for="last_name">Last Name</label>
-    <input type="text" id="last_name" th:field="*{lastName}" required />
+                <div class="form-group">
+                    <label for="last_name">
+                        <i class="fas fa-user"></i>
+                        Фамилия
+                    </label>
+                    <input type="text" id="last_name" th:field="*{lastName}" placeholder="Введите вашу фамилию" required />
+                </div>
 
-    <label for="gender">Пол</label>
-    <select id="gender" th:field="*{gender}" class="dropdown" required>
-        <option value="" disabled selected>Выберите пол</option>
-        <option value="Male">Мужской</option>
-        <option value="Female">Женский</option>
-    </select>
+                <div class="form-group">
+                    <label for="gender">
+                        <i class="fas fa-venus-mars"></i>
+                        Пол
+                    </label>
+                    <select id="gender" th:field="*{gender}" class="modern-select" required>
+                        <option value="" disabled selected>Выберите пол</option>
+                        <option value="Male">Мужской</option>
+                        <option value="Female">Женский</option>
+                    </select>
+                </div>
 
-    <label for="date_of_birth">Дата рождения</label>
-    <input type="date" id="date_of_birth" th:field="*{dateOfBirth}" required /> <br />
+                <div class="form-group">
+                    <label for="date_of_birth">
+                        <i class="fas fa-calendar"></i>
+                        Дата рождения
+                    </label>
+                    <input type="date" id="date_of_birth" th:field="*{dateOfBirth}" required />
+                </div>
 
-    <input type="submit" value="Зарегистрироваться" />
-    <div style="text-align: center;">
-        <a href="/login">Назад</a>
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-user-plus"></i>
+                    Зарегистрироваться
+                </button>
+
+                <div th:if="${param.error}" class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Ошибка регистрации
+                </div>
+                
+                <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Пользователь с таким email уже существует
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <a href="/login" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Вернуться к входу
+                </a>
+                <p>&copy; 2024 TicketSystem. Все права защищены.</p>
+            </div>
+        </div>
     </div>
-    <p th:if="${errorMessage}" class="error" th:text="${errorMessage}">Пользователь такой существует</p>
-</form>
 </body>
 </html>

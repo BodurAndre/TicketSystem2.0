@@ -3,17 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Вход в систему - TicketSystem</title>
     <link rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-<form th:action="@{/login}" method="post" enctype="multipart/form-data">
-    <label for="email">Email:</label>
-    <input type="text" id="email" name="username" autofocus="autofocus" />
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" />
-    <input type="submit" value="Log in" />
-    <p th:if="${param.error}" class="error">Неверный логин или пароль</p>
-</form>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h1>TicketSystem</h1>
+                </div>
+                <p class="login-subtitle">Система управления заявками</p>
+            </div>
+            
+            <form th:action="@{/login}" method="post" enctype="multipart/form-data" class="login-form">
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
+                    <input type="email" id="email" name="username" autofocus="autofocus" placeholder="Введите ваш email" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Пароль
+                    </label>
+                    <input type="password" id="password" name="password" placeholder="Введите ваш пароль" required />
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Войти в систему
+                </button>
+                
+                <div th:if="${param.error}" class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Неверный логин или пароль
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <p>&copy; 2024 TicketSystem. Все права защищены.</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

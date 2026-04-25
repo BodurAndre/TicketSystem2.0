@@ -56,7 +56,7 @@ async function initializeData() {
         console.log('Инициализируем данные...');
         const csrf = await getCsrfToken();
         
-        $.ajax({
+    $.ajax({
             url: "/api/init-data",
             method: "POST",
             dataType: "json",
@@ -64,7 +64,7 @@ async function initializeData() {
             data: JSON.stringify({}),
             headers: { [csrf.headerName]: csrf.token },
             xhrFields: { withCredentials: true },
-            success: function(data) {
+        success: function(data) {
                 console.log('Результат инициализации:', data);
                 showNotification(data.message, 'success');
                 
@@ -481,7 +481,7 @@ async function handleFormSubmit(event) {
 
     try {
         const csrf = await getCsrfToken();
-        
+
         $.ajax({
             url: '/RequestCreate',
             method: 'POST',

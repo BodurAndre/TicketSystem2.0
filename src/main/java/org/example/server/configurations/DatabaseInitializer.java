@@ -56,7 +56,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             }
 
             log.info("No data found, initializing database...");
-            
+            /*
             // Создаем компании
             Company company1 = new Company();
             company1.setName("Pizza Lunch SRL");
@@ -111,7 +111,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             phone3.setCompany(company2);
             phone3 = phoneNumberService.savePhoneNumber(phone3);
             log.info("Created phone number: {} for company: {}", phone3.getNumber(), company2.getName());
-
+            */
             // Если нет пользователей — создаём админа
             User admin = null;
             if (userService.countUsers() == 0) {
@@ -129,71 +129,6 @@ public class DatabaseInitializer implements CommandLineRunner {
                 log.info("Создан админ: admin@git.com");
             } else {
                 admin = userService.getUserByEmail("admin@git.com\"");
-            }
-
-            // Создаем тестовые заявки с разными датами
-            if (admin != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-                
-                // Заявка на сегодня
-                Request request1 = new Request();
-                request1.setData(LocalDate.now().format(formatter));
-                request1.setTime("10:30");
-                request1.setTema("Проблема с принтером");
-                request1.setCompany(company1);
-                request1.setServer(server1);
-                request1.setContacts("+373 22 123456");
-                request1.setCreateUser(admin);
-                request1.setStatus("OPEN");
-                request1.setPriority("HIGH");
-                request1.setDescription("Принтер не печатает документы");
-                requestService.saveRequest(request1);
-                log.info("Created request: {} for date: {}", request1.getTema(), request1.getData());
-
-                // Заявка на вчера
-                Request request2 = new Request();
-                request2.setData(LocalDate.now().minusDays(1).format(formatter));
-                request2.setTime("14:15");
-                request2.setTema("Проблема с интернетом");
-                request2.setCompany(company2);
-                request2.setServer(server4);
-                request2.setContacts("+373 22 789012");
-                request2.setCreateUser(admin);
-                request2.setStatus("CLOSED");
-                request2.setPriority("MEDIUM");
-                request2.setDescription("Медленное интернет-соединение");
-                requestService.saveRequest(request2);
-                log.info("Created request: {} for date: {}", request2.getTema(), request2.getData());
-
-                // Заявка на неделю назад
-                Request request3 = new Request();
-                request3.setData(LocalDate.now().minusDays(7).format(formatter));
-                request3.setTime("09:00");
-                request3.setTema("Установка ПО");
-                request3.setCompany(company1);
-                request3.setServer(server2);
-                request3.setContacts("+373 22 654321");
-                request3.setCreateUser(admin);
-                request3.setStatus("OPEN");
-                request3.setPriority("LOW");
-                request3.setDescription("Требуется установка нового программного обеспечения");
-                requestService.saveRequest(request3);
-                log.info("Created request: {} for date: {}", request3.getTema(), request3.getData());
-
-                // Заявка на месяц назад
-                Request request4 = new Request();
-                request4.setData(LocalDate.now().minusDays(30).format(formatter));
-                request4.setTime("16:45");
-                request4.setTema("Замена оборудования");
-                request4.setCompany(company2);
-                request4.setServer(server4);
-                request4.setContacts("+373 22 789012");
-                request4.setCreateUser(admin);
-                request4.setStatus("CLOSED");
-                request4.setPriority("HIGH");
-                request4.setDescription("Требуется замена старого оборудования");
-                requestService.saveRequest(request4);
-                log.info("Created request: {} for date: {}", request4.getTema(), request4.getData());
             }
 
             log.info("Database initialization completed successfully");

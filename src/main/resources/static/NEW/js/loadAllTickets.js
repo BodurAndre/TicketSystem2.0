@@ -309,24 +309,24 @@ function renderFilteredTickets() {
     tableBody.innerHTML = '';
     
     filtered.forEach(function(ticket) {
-        let row = document.createElement('tr');
-        
-        let cellId = document.createElement('td');
+                let row = document.createElement('tr');
+
+                let cellId = document.createElement('td');
         cellId.textContent = ticket.id;
-        row.appendChild(cellId);
-        
-        let cellData = document.createElement('td');
+                row.appendChild(cellId);
+
+                let cellData = document.createElement('td');
         cellData.textContent = formatDate(ticket.data);
         row.appendChild(cellData);
-        
-        let cellTime = document.createElement('td');
+
+                let cellTime = document.createElement('td');
         cellTime.textContent = formatTime(ticket.time);
         row.appendChild(cellTime);
-        
-        let cellTema = document.createElement('td');
+
+                let cellTema = document.createElement('td');
         cellTema.textContent = ticket.tema;
-        row.appendChild(cellTema);
-        
+                row.appendChild(cellTema);
+
         let cellCompany = document.createElement('td');
         if(ticket.company != null) {
             cellCompany.textContent = ticket.company.name;
@@ -335,19 +335,19 @@ function renderFilteredTickets() {
         }
         row.appendChild(cellCompany);
         
-        let cellPriority = document.createElement('td');
+                let cellPriority = document.createElement('td');
         cellPriority.innerHTML = `<span class="priority-badge priority-${ticket.priority.toLowerCase()}">${ticket.priority}</span>`;
-        row.appendChild(cellPriority);
-        
-        let cellUser = document.createElement('td');
+                row.appendChild(cellPriority);
+
+                let cellUser = document.createElement('td');
         if(ticket.createUser != null) {
             const user = ticket.createUser;
             const userText = `${user.firstName} ${user.lastName}`;
-            cellUser.textContent = userText;
+                    cellUser.textContent = userText;
         } else {
             cellUser.textContent = "Не указан";
-        }
-        row.appendChild(cellUser);
+                }
+                row.appendChild(cellUser);
         
         let cellAssignee = document.createElement('td');
         if(ticket.assigneeUser != null) {
@@ -359,40 +359,40 @@ function renderFilteredTickets() {
         }
         row.appendChild(cellAssignee);
         
-        let cellStatus = document.createElement('td');
+                let cellStatus = document.createElement('td');
         cellStatus.innerHTML = `<span class="status-badge status-${ticket.status.toLowerCase()}">${ticket.status}</span>`;
-        row.appendChild(cellStatus);
-        
-        let cellAction = document.createElement('td');
-        cellAction.className = 'edit';
-        let actionDiv = document.createElement('div');
-        actionDiv.className = 'action-buttons';
-        
-        let editBtn = document.createElement('button');
-        editBtn.className = 'action-btn edit';
-        editBtn.title = 'Редактировать';
-        editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-        editBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
+                row.appendChild(cellStatus);
+
+                let cellAction = document.createElement('td');
+                cellAction.className = 'edit';
+                let actionDiv = document.createElement('div');
+                actionDiv.className = 'action-buttons';
+
+                let editBtn = document.createElement('button');
+                editBtn.className = 'action-btn edit';
+                editBtn.title = 'Редактировать';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
             window.location.href = '#request-id' + ticket.id;
-        });
-        actionDiv.appendChild(editBtn);
-        
-        let deleteBtn = document.createElement('button');
-        deleteBtn.className = 'action-btn delete';
-        deleteBtn.title = 'Закрыть';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
+                });
+                actionDiv.appendChild(editBtn);
+
+                let deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn delete';
+                deleteBtn.title = 'Закрыть';
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                deleteBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
             showDeleteModal(ticket.id);
-        });
-        actionDiv.appendChild(deleteBtn);
-        
-        cellAction.appendChild(actionDiv);
-        row.appendChild(cellAction);
-        
-        tableBody.appendChild(row);
-    });
+                });
+                actionDiv.appendChild(deleteBtn);
+
+                cellAction.appendChild(actionDiv);
+                row.appendChild(cellAction);
+
+                tableBody.appendChild(row);
+            });
     
     if (filtered.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#aaa;">Нет тикетов</td></tr>';
@@ -600,5 +600,5 @@ async function loadAllUsers() {
         error: function (xhr, status, error) {
             console.error("Ошибка при загрузке пользователей: ", error);
         }
-    });
+        });
 }

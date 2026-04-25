@@ -281,7 +281,7 @@ public class SupportController {
 
 
     @PostMapping("/requestClose")
-    public ResponseEntity<String> closeRequest(@RequestBody long id) {
+    public ResponseEntity<String> closeRequest(@RequestBody long id){
         try {
             log.info("ID request", id);
             
